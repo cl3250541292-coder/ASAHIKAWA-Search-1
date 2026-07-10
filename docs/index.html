@@ -43,10 +43,18 @@
   .chip:hover { background: #ddd; }
 
   #count { font-weight: bold; margin: 20px 0 0; }
-  .result { border-bottom: 1px solid #e5e5e5; padding: 20px 0; }
-  .rtitle { font-size: 1.1rem; font-weight: bold; color: #1a0dab; text-decoration: none; }
+  .result { padding: 20px 0; }
+  .site { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .site img { width: 26px; height: 26px; border: 1px solid #eee; border-radius: 50%;
+          background: #fff; padding: 3px; }
+  .sitename { font-size: 0.85rem; color: #202124; }
+  .siteurl { font-size: 0.8rem; color: #4d5156; word-break: break-all; }
+  .rtitle { font-size: 1.15rem; font-weight: normal; color: #1a0dab; text-decoration: none;
+          display: block; margin: 2px 0 4px; }
   .rtitle:hover { text-decoration: underline; }
-  .excerpt { color: #444; font-size: 0.9rem; line-height: 1.6; }
+  .excerpt { color: #4d5156; font-size: 0.9rem; line-height: 1.6; margin: 0;
+          display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+          overflow: hidden; }
   .excerpt mark { background: #ff0; }
 
   #pager { display: flex; justify-content: center; align-items: center;
@@ -133,7 +141,7 @@ async function ensurePagefind() {
 async function doSearch(term) {
   lastTerm = term;
   const pf = await ensurePagefind();
-  const res = await pf.search(term);
+  const res = await pf.search(term, { excerptLength: 60 });
   results = res.results;
   page = 1;
   loaded = PER_PAGE;
@@ -154,7 +162,19 @@ async function render() {
   resultsEl.innerHTML = datas.map(d => {
     const url = (d.meta && d.meta.url) || d.url;
     const title = (d.meta && d.meta.title) || url;
+    let domain = '', dispUrl = url;
+    try {
+      const u = new URL(url);
+      domain = u.hostname;
+      const parts = u.pathname.split('/').filter(Boolean);
+      dispUrl = 'https://' + domain + (parts.length ? ' \u203a ' + parts.join(' \u203a ') : '');
+    } catch(e) {}
+    const siteName = domain === 'www.city.asahikawa.hokkaido.jp' ? '旭川市' : domain;
     return `<div class="result">
+      <div class="site">
+        <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="">
+        <div><div class="sitename">${siteName}</div><div class="siteurl">${dispUrl}</div></div>
+      </div>
       <a class="rtitle" href="${url}" target="_blank" rel="noopener">${title}</a>
       <p class="excerpt">${d.excerpt}</p>
     </div>`;
