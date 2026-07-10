@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASAHIKAWA Search 1 - 旭川特化検索</title>
+<link href="pagefind/pagefind-ui.css" rel="stylesheet">
+<script src="pagefind/pagefind-ui.js"></script>
+<style>
+  body { font-family: sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.4rem; }
+  .note { color: #666; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<h1>ASAHIKAWA Search 1</h1>
+<p class="note">旭川市の情報に特化した検索エンジン(テスト版・旭川市公式サイト30ページ)</p>
+<div id="search"></div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  new PagefindUI({ element: "#search", showSubResults: true, translations: {
+    placeholder: "旭川の情報を検索",
+    zero_results: "「[SEARCH_TERM]」に一致する結果はありませんでした"
+  }});
+});
+</script>
+</body>
+</html>
