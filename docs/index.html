@@ -183,7 +183,11 @@ async function render() {
       const parts = u.pathname.split('/').filter(Boolean);
       dispUrl = 'https://' + domain + (parts.length ? ' \u203a ' + parts.join(' \u203a ') : '');
     } catch(e) {}
-    const siteName = domain === 'www.city.asahikawa.hokkaido.jp' ? '旭川市' : domain;
+    const names = {
+      'www.city.asahikawa.hokkaido.jp': '旭川市',
+      'www.atca.jp': '旭川観光コンベンション協会'
+    };
+    const siteName = names[domain] || domain;
     return `<div class="result">
       <div class="site">
         <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="">

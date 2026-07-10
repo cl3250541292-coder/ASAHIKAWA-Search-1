@@ -15,9 +15,10 @@ from bs4 import BeautifulSoup
 # ===== 設定 =====
 SEED_URLS = [
     "https://www.city.asahikawa.hokkaido.jp/",
+    "https://www.atca.jp/",
 ]
-ALLOWED_DOMAINS = {"www.city.asahikawa.hokkaido.jp"}
-MAX_PAGES = 30          # テスト版の上限
+ALLOWED_DOMAINS = {"www.city.asahikawa.hokkaido.jp", "www.atca.jp"}
+MAX_PAGES = 300          # テスト版の上限
 DELAY_SEC = 1.0         # 1ページごとの待ち時間(サーバーへの配慮)
 OUT_DIR = "docs/corpus"
 USER_AGENT = "ASAHIKAWA-Search-1-Bot (student project)"
@@ -58,15 +59,40 @@ def crawl():
         if not can_fetch(url):
             print(f"[skip robots] {url}")
             continue
+        low = url.lower()
+        if low.endswith((".pdf", ".jpg", ".jpeg", ".png", ".gif", ".zip",
+                         ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+                         ".mp3", ".mp4", ".csv")):
+            continue
         try:
-            r = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=10)
+            r = requests.get(url, headers={"User-Agent": USER_AGENT},
+                             timeout=(5, 10), stream=True)
+            ctype = r.headers.get("Content-Type", "")
+            if r.status_code != 200 or "text/html" not in ctype:
+                r.close()
+                continue
+            raw = b""
+            for chunk in r.iter_content(65536):
+                raw += chunk
+                if len(raw) > 2_000_000:
+                    print(f"[skip large] {url}")
+                    raw = None
+                    break
+            r.close()
         except Exception as e:
             print(f"[error] {url} : {e}")
             continue
-        if r.status_code != 200 or "text/html" not in r.headers.get("Content-Type", ""):
+        if raw is None:
             continue
-        r.encoding = r.apparent_encoding
-        soup = BeautifulSoup(r.text, "html.parser")
+        # 文字コードを中身から自動判定(文字化け対策)
+        import chardet
+        guess = chardet.detect(raw[:20000])
+        enc = guess.get("encoding") or "utf-8"
+        try:
+            page_text = raw.decode(enc, errors="replace")
+        except LookupError:
+            page_text = raw.decode("utf-8", errors="replace")
+        soup = BeautifulSoup(page_text, "html.parser")
 
         title = soup.title.get_text(strip=True) if soup.title else url
         body_text = clean_text(soup)
