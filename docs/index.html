@@ -4,24 +4,222 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ASAHIKAWA Search 1 - 旭川特化検索</title>
-<link href="pagefind/pagefind-ui.css" rel="stylesheet">
-<script src="pagefind/pagefind-ui.js"></script>
 <style>
-  body { font-family: sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; }
-  h1 { font-size: 1.4rem; }
-  .note { color: #666; font-size: 0.85rem; }
+  * { box-sizing: border-box; }
+  body { font-family: sans-serif; margin: 0; min-height: 100vh;
+         display: flex; flex-direction: column; background: #fff; }
+  main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  /* ===== ヘッダー(ホーム時:中央大ロゴ / 検索時:横並び) ===== */
+  .logo { background: #888; color: #fff; display: flex;
+          align-items: center; justify-content: center; border-radius: 4px; }
+  body.home-mode header { padding: 16px; }
+  body.home-mode .logo { width: 240px; height: 80px; font-size: 1.5rem; margin: 40px auto 24px; }
+  body.home-mode .searchbox { max-width: 688px; margin: 0 auto; }
+
+  body.search-mode header { display: flex; align-items: center; gap: 20px;
+          padding: 12px 20px; border-bottom: 1px solid #ccc; }
+  body.search-mode .logo { width: 140px; height: 48px; font-size: 1.1rem; flex-shrink: 0; }
+  body.search-mode .searchbox { flex: 1; max-width: 620px; }
+
+  .searchbox { display: flex; align-items: center; gap: 8px; border: 1px solid #ccc;
+          border-radius: 24px; padding: 10px 18px; background: #fff; }
+  .searchbox svg { width: 18px; height: 18px; flex-shrink: 0; stroke: #777; }
+  .searchbox input { flex: 1; border: none; outline: none; font-size: 1rem; min-width: 0; }
+
+  .engines { display: flex; justify-content: center; gap: 16px; margin: 24px 0 8px; flex-wrap: wrap; }
+  .engines button { background: none; border: 1px solid #ddd; border-radius: 12px;
+          padding: 10px 6px; cursor: pointer; width: 84px;
+          display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .engines button:hover { background: #f2f2f2; }
+  .engines img { width: 32px; height: 32px; display: block; }
+  .engines .label { font-size: 0.65rem; color: #555; white-space: nowrap; }
+  .note { color: #666; font-size: 0.8rem; text-align: center; }
+
+  #popular { margin: 32px 0 8px; }
+  #popular p { font-size: 0.9rem; color: #333; }
+  .chip { background: #e8e8e8; border: none; border-radius: 6px;
+          padding: 8px 20px; margin: 4px 8px 4px 0; cursor: pointer; font-size: 0.95rem; }
+  .chip:hover { background: #ddd; }
+
+  #count { font-weight: bold; margin: 20px 0 0; }
+  .result { border-bottom: 1px solid #e5e5e5; padding: 20px 0; }
+  .rtitle { font-size: 1.1rem; font-weight: bold; color: #1a0dab; text-decoration: none; }
+  .rtitle:hover { text-decoration: underline; }
+  .excerpt { color: #444; font-size: 0.9rem; line-height: 1.6; }
+  .excerpt mark { background: #ff0; }
+
+  #pager { display: flex; justify-content: center; align-items: center;
+          gap: 14px; margin: 20px 0 28px; flex-wrap: wrap; }
+  #pager a { color: #1a0dab; text-decoration: underline; cursor: pointer; font-size: 1.05rem; }
+  #pager .cur { font-weight: bold; color: #000; text-decoration: none; }
+  #loadmore { display: block; width: 100%; padding: 14px; margin: 20px 0;
+          border: 1px solid #ccc; border-radius: 8px; background: #fff;
+          cursor: pointer; font-size: 1rem; }
+  footer { border-top: 1px solid #ddd; background: #fff; text-align: center;
+          padding: 16px; color: #333; font-size: 0.9rem; }
+  .hidden { display: none; }
 </style>
 </head>
-<body>
-<h1>ASAHIKAWA Search 1</h1>
-<p class="note">旭川市の情報に特化した検索エンジン(テスト版・旭川市公式サイト30ページ)</p>
-<div id="search"></div>
-<script>
-window.addEventListener('DOMContentLoaded', () => {
-  new PagefindUI({ element: "#search", showSubResults: true, translations: {
-    placeholder: "旭川の情報を検索",
-    zero_results: "「[SEARCH_TERM]」に一致する結果はありませんでした"
-  }});
+<body class="home-mode">
+<header>
+  <div class="logo">ロゴ</div>
+  <div class="searchbox">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+      <circle cx="11" cy="11" r="7"></circle>
+      <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+    </svg>
+    <input id="q" type="text" placeholder="旭川の情報を検索">
+  </div>
+</header>
+<main>
+  <div id="count"></div>
+  <div id="results"></div>
+
+  <div id="popular" class="hidden">
+    <p>よく調べられているワード</p>
+    <button class="chip">旭川観光</button>
+    <button class="chip">旭川ラーメン</button>
+    <button class="chip">旭川家具</button>
+    <button class="chip">旭山動物園</button>
+  </div>
+  <div id="pager"></div>
+
+  <div id="home">
+    <div class="engines" id="engines">
+      <button data-url="https://www.google.com/search?q=" title="Googleで検索">
+        <img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google"><span class="label">Google</span>
+      </button>
+      <button data-url="https://www.bing.com/search?q=" title="Bingで検索">
+        <img src="https://www.google.com/s2/favicons?domain=bing.com&sz=64" alt="Bing"><span class="label">Bing</span>
+      </button>
+      <button data-url="https://duckduckgo.com/?q=" title="DuckDuckGoで検索">
+        <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64" alt="DuckDuckGo"><span class="label">DuckDuckGo</span>
+      </button>
+      <button data-url="https://ja.wikipedia.org/w/index.php?search=" title="Wikipediaで検索">
+        <img src="https://www.google.com/s2/favicons?domain=ja.wikipedia.org&sz=64" alt="Wikipedia"><span class="label">Wikipedia</span>
+      </button>
+    </div>
+    <p class="note">アイコンをクリックすると、入力した言葉を各検索エンジンで開きます(「旭川」を自動追加)</p>
+  </div>
+</main>
+<footer>© 2026 ASAHIKAWA Search. All rights reserved.</footer>
+
+<script type="module">
+const PER_PAGE = 10;
+let pagefind = null;
+let results = [];
+let page = 1;
+let loaded = 0;
+let lastTerm = "";
+
+const q = document.getElementById('q');
+const home = document.getElementById('home');
+const popular = document.getElementById('popular');
+const countEl = document.getElementById('count');
+const resultsEl = document.getElementById('results');
+const pagerEl = document.getElementById('pager');
+
+const isMobile = () => matchMedia('(max-width: 768px)').matches;
+
+async function ensurePagefind() {
+  if (!pagefind) {
+    pagefind = await import("./pagefind/pagefind.js");
+    await pagefind.init();
+  }
+  return pagefind;
+}
+
+async function doSearch(term) {
+  lastTerm = term;
+  const pf = await ensurePagefind();
+  const res = await pf.search(term);
+  results = res.results;
+  page = 1;
+  loaded = PER_PAGE;
+  render();
+}
+
+async function render() {
+  const total = results.length;
+  countEl.textContent = total
+    ? `「${lastTerm}」の${total}件の検索結果`
+    : `「${lastTerm}」に一致する結果はありませんでした`;
+
+  let start, end;
+  if (isMobile()) { start = 0; end = Math.min(total, loaded); }
+  else { start = (page - 1) * PER_PAGE; end = Math.min(total, start + PER_PAGE); }
+
+  const datas = await Promise.all(results.slice(start, end).map(r => r.data()));
+  resultsEl.innerHTML = datas.map(d => {
+    const url = (d.meta && d.meta.url) || d.url;
+    const title = (d.meta && d.meta.title) || url;
+    return `<div class="result">
+      <a class="rtitle" href="${url}" target="_blank" rel="noopener">${title}</a>
+      <p class="excerpt">${d.excerpt}</p>
+    </div>`;
+  }).join('');
+
+  pagerEl.innerHTML = '';
+  if (isMobile()) {
+    if (end < total) {
+      const b = document.createElement('button');
+      b.id = 'loadmore'; b.textContent = '次を読み込む';
+      b.onclick = () => { loaded += PER_PAGE; render(); };
+      pagerEl.appendChild(b);
+    }
+  } else if (total > 0) {
+    const pages = Math.ceil(total / PER_PAGE);
+    if (pages > 1) {
+      const addLink = (n, label, cur) => {
+        const a = document.createElement('a');
+        a.textContent = label || n;
+        if (cur) a.className = 'cur';
+        else a.onclick = () => { page = n; render(); scrollTo(0, 0); };
+        pagerEl.appendChild(a);
+      };
+      let s = Math.max(1, page - 3);
+      let e = Math.min(pages, s + 6);
+      if (s > 1) { addLink(1, '1'); pagerEl.append('…'); }
+      for (let i = s; i <= e; i++) addLink(i, String(i), i === page);
+      if (e < pages) { pagerEl.append('…'); addLink(pages, String(pages)); }
+      if (page < pages) addLink(page + 1, '次へ >');
+    }
+  }
+}
+
+function setMode(searching) {
+  document.body.className = searching ? 'search-mode' : 'home-mode';
+  home.classList.toggle('hidden', searching);
+  popular.classList.toggle('hidden', !searching);
+  if (!searching) { countEl.textContent = ''; resultsEl.innerHTML = ''; pagerEl.innerHTML = ''; }
+}
+
+q.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const term = q.value.trim();
+  if (!term) { setMode(false); return; }
+  setMode(true);
+  doSearch(term);
+  scrollTo(0, 0);
+});
+
+document.querySelectorAll('.engines button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    let t = q.value.trim();
+    if (!t) t = '旭川';
+    else if (!t.includes('旭川')) t = '旭川 ' + t;
+    window.open(btn.dataset.url + encodeURIComponent(t), '_blank');
+  });
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    q.value = chip.textContent;
+    setMode(true);
+    doSearch(chip.textContent);
+    scrollTo(0, 0);
+  });
 });
 </script>
 </body>
