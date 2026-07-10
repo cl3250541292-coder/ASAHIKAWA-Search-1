@@ -142,21 +142,7 @@ async function doSearch(term) {
   lastTerm = term;
   const pf = await ensurePagefind();
   const res = await pf.search(term, { excerptLength: 60 });
-  // トップページ・浅い階層のページを優先する並べ替え
-  const scored = await Promise.all(res.results.map(async r => {
-    const d = await r.data();
-    const url = (d.meta && d.meta.url) || d.url || '';
-    let depth = 9;
-    try { depth = new URL(url).pathname.split('/').filter(Boolean).length; } catch(e) {}
-    // Pagefindの元の並び(index)を基礎に、階層の浅さで加点
-    return { r, d, depth };
-  }));
-  scored.sort((a, b) => {
-    const sa = scored.indexOf(a) - (a.depth <= 1 ? 50 : a.depth <= 2 ? 10 : 0);
-    const sb = scored.indexOf(b) - (b.depth <= 1 ? 50 : b.depth <= 2 ? 10 : 0);
-    return sa - sb;
-  });
-  results = scored.map(s => s.r);
+  results = res.results;
   page = 1;
   loaded = PER_PAGE;
   render();
