@@ -26,6 +26,11 @@
           border-radius: 24px; padding: 10px 18px; background: #fff; }
   .searchbox svg { width: 18px; height: 18px; flex-shrink: 0; stroke: #777; }
   .searchbox input { flex: 1; border: none; outline: none; font-size: 1rem; min-width: 0; }
+  #clearbtn { display: none; border: none; background: none; cursor: pointer;
+          color: #70757a; font-size: 1.4rem; line-height: 1; padding: 0 4px;
+          flex: 0 0 auto; }
+  #clearbtn:hover { color: #202124; }
+  #clearbtn.show { display: block; }
 
   #rotator { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
   #rotator button { background: none; border: none; cursor: pointer; padding: 5px;
@@ -137,6 +142,7 @@
         <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
       </svg>
       <input id="q" type="text" placeholder="旭川の情報を検索">
+      <button id="clearbtn" type="button" title="入力を消す" aria-label="入力を消す">&#10005;</button>
     </div>
     <div id="rotator">
       <button data-url="https://www.google.com/" title="Googleを開く">
@@ -516,6 +522,15 @@ function setMode(searching) {
   if (!searching) { countEl.textContent = ''; resultsEl.innerHTML = ''; pagerEl.innerHTML = ''; kcardEl.innerHTML = ''; topLinkHtml = ''; }
 }
 
+const clearBtn = document.getElementById('clearbtn');
+function updateClearBtn() { clearBtn.classList.toggle('show', q.value.length > 0); }
+q.addEventListener('input', updateClearBtn);
+clearBtn.addEventListener('click', () => {
+  q.value = '';
+  updateClearBtn();
+  q.focus();
+});
+
 q.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   const term = q.value.trim();
@@ -567,6 +582,7 @@ cityBtn.addEventListener('click', () => {
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', () => {
     q.value = chip.textContent;
+    updateClearBtn();
     setMode(true);
     doSearch(chip.textContent);
     scrollTo(0, 0);
