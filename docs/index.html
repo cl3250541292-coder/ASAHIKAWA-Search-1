@@ -27,6 +27,25 @@
   .searchbox svg { width: 18px; height: 18px; flex-shrink: 0; stroke: #777; }
   .searchbox input { flex: 1; border: none; outline: none; font-size: 1rem; min-width: 0; }
 
+  #rotator { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+  #rotator button { background: none; border: none; cursor: pointer; padding: 5px;
+          width: 0; opacity: 0; overflow: hidden; pointer-events: none;
+          transition: width 0.25s, opacity 0.25s; }
+  #rotator button img { width: 30px; height: 30px; display: block; }
+  #rotator button:first-child { width: 40px; opacity: 1; pointer-events: auto; }
+  #rotator:hover button, #rotator.open button {
+          width: 40px; opacity: 1; pointer-events: auto; }
+  #rotator button:hover img { transform: scale(1.15); }
+  body.home-mode header { display: flex; flex-direction: column; align-items: center; }
+  body.home-mode .hrow { display: flex; align-items: center; gap: 10px;
+          width: 100%; max-width: 740px; }
+  body.home-mode .hrow .searchbox { flex: 1; }
+  body.search-mode .hrow { display: flex; align-items: center; gap: 10px; flex: 1;
+          max-width: 660px; }
+  body.search-mode .hrow .searchbox { flex: 1; }
+  @media (max-width: 768px) {
+    #rotator img { width: 26px; height: 26px; }
+  }
   .engines { display: flex; justify-content: center; gap: 16px; margin: 24px 0 8px; flex-wrap: wrap; }
   .engines button { background: none; border: 1px solid #ddd; border-radius: 12px;
           padding: 10px 6px; cursor: pointer; width: 84px;
@@ -105,12 +124,31 @@
 <body class="home-mode">
 <header>
   <div class="logo">ロゴ</div>
-  <div class="searchbox">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
-      <circle cx="11" cy="11" r="7"></circle>
-      <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-    </svg>
-    <input id="q" type="text" placeholder="旭川の情報を検索">
+  <div class="hrow">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+      </svg>
+      <input id="q" type="text" placeholder="旭川の情報を検索">
+    </div>
+    <div id="rotator">
+      <button data-url="https://www.google.com/" title="Googleを開く">
+        <img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google">
+      </button>
+      <button data-url="https://www.bing.com/" title="Bingを開く">
+        <img src="https://www.google.com/s2/favicons?domain=bing.com&sz=64" alt="Bing">
+      </button>
+      <button data-url="https://www.yahoo.co.jp/" title="Yahoo! JAPANを開く">
+        <img src="https://www.google.com/s2/favicons?domain=yahoo.co.jp&sz=64" alt="Yahoo! JAPAN">
+      </button>
+      <button data-url="https://duckduckgo.com/" title="DuckDuckGoを開く">
+        <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64" alt="DuckDuckGo">
+      </button>
+      <button data-url="https://search.brave.com/" title="Brave Searchを開く">
+        <img src="https://www.google.com/s2/favicons?domain=search.brave.com&sz=64" alt="Brave Search">
+      </button>
+    </div>
   </div>
 </header>
 <main>
@@ -327,6 +365,23 @@ document.querySelectorAll('.engines button').forEach(btn => {
     else if (!t.includes('旭川')) t = '旭川 ' + t;
     window.open(btn.dataset.url + encodeURIComponent(t), '_blank');
   });
+});
+
+// エンジン展開ボタン(ホバーで展開、クリックで開く。スマホは1タップ目で展開)
+const rot = document.getElementById('rotator');
+rot.querySelectorAll('button').forEach((btn, i) => {
+  btn.addEventListener('click', () => {
+    const isTouch = matchMedia('(hover: none)').matches;
+    if (isTouch && !rot.classList.contains('open')) {
+      rot.classList.add('open');   // スマホ:1タップ目は展開のみ
+      return;
+    }
+    window.open(btn.dataset.url, '_blank');
+    rot.classList.remove('open');
+  });
+});
+document.addEventListener('click', (e) => {
+  if (!rot.contains(e.target)) rot.classList.remove('open');
 });
 
 document.querySelectorAll('.chip').forEach(chip => {
