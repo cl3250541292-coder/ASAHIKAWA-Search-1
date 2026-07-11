@@ -27,17 +27,26 @@ PROFILES = {
     },
     "fukagawa": {
         "seeds": [
-            "https://www.city.fukagawa.lg.jp/",
+            "https://www.city.fukagawa.lg.jp/kankou/index.html",
+            "https://www.kitasorachi.com/",
         ],
-        "domains": {"www.city.fukagawa.lg.jp"},
-        "max_pages": 300,
+        "domains": {"www.city.fukagawa.lg.jp", "www.kitasorachi.com"},
+        "max_pages": 150,
         "out_dir": "docs/fukagawa/corpus",
+        "path_rules": {"www.city.fukagawa.lg.jp": ["/kankou/"]},
     },
 }
 
 PROFILE = PROFILES[sys.argv[1] if len(sys.argv) > 1 else "asahikawa"]
 SEED_URLS = PROFILE["seeds"]
 ALLOWED_DOMAINS = PROFILE["domains"]
+PATH_RULES = PROFILE.get("path_rules", {})
+
+def path_ok(p):
+    rules = PATH_RULES.get(p.netloc)
+    if not rules:
+        return True
+    return any(p.path.startswith(r) for r in rules)
 MAX_PAGES = PROFILE["max_pages"]          # テスト版の上限
 DELAY_SEC = 1.0         # 1ページごとの待ち時間(サーバーへの配慮)
 OUT_DIR = PROFILE["out_dir"]
@@ -138,7 +147,7 @@ def crawl():
         for a in soup.find_all("a", href=True):
             next_url = urljoin(url, a["href"]).split("#")[0]
             p = urlparse(next_url)
-            if p.scheme in ("http", "https") and p.netloc in ALLOWED_DOMAINS and next_url not in seen:
+            if p.scheme in ("http", "https") and p.netloc in ALLOWED_DOMAINS and path_ok(p) and next_url not in seen:
                 seen.add(next_url)
                 queue.append(next_url)
 
