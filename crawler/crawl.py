@@ -30,7 +30,7 @@ PROFILES = {
             "https://www.city.fukagawa.lg.jp/",
         ],
         "domains": {"www.city.fukagawa.lg.jp"},
-        "max_pages": 100,
+        "max_pages": 300,
         "out_dir": "docs/fukagawa/corpus",
     },
 }
