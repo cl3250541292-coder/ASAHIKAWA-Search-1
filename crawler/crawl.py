@@ -13,14 +13,34 @@ import requests
 from bs4 import BeautifulSoup
 
 # ===== 設定 =====
-SEED_URLS = [
-    "https://www.city.asahikawa.hokkaido.jp/",
-    "https://www.atca.jp/",
-]
-ALLOWED_DOMAINS = {"www.city.asahikawa.hokkaido.jp", "www.atca.jp"}
-MAX_PAGES = 300          # テスト版の上限
+import sys
+
+PROFILES = {
+    "asahikawa": {
+        "seeds": [
+            "https://www.city.asahikawa.hokkaido.jp/",
+            "https://www.atca.jp/",
+        ],
+        "domains": {"www.city.asahikawa.hokkaido.jp", "www.atca.jp"},
+        "max_pages": 300,
+        "out_dir": "docs/corpus",
+    },
+    "fukagawa": {
+        "seeds": [
+            "https://www.city.fukagawa.lg.jp/",
+        ],
+        "domains": {"www.city.fukagawa.lg.jp"},
+        "max_pages": 100,
+        "out_dir": "docs/fukagawa/corpus",
+    },
+}
+
+PROFILE = PROFILES[sys.argv[1] if len(sys.argv) > 1 else "asahikawa"]
+SEED_URLS = PROFILE["seeds"]
+ALLOWED_DOMAINS = PROFILE["domains"]
+MAX_PAGES = PROFILE["max_pages"]          # テスト版の上限
 DELAY_SEC = 1.0         # 1ページごとの待ち時間(サーバーへの配慮)
-OUT_DIR = "docs/corpus"
+OUT_DIR = PROFILE["out_dir"]
 USER_AGENT = "ASAHIKAWA-Search-1-Bot (student project)"
 
 # ===== robots.txt の確認 =====

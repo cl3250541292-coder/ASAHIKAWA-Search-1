@@ -116,6 +116,12 @@
   #loadmore { display: block; width: 100%; padding: 14px; margin: 20px 0;
           border: 1px solid #ccc; border-radius: 8px; background: #fff;
           cursor: pointer; font-size: 1rem; }
+  #citytoggle { position: fixed; left: 14px; bottom: 14px; width: 30px; height: 30px;
+          border-radius: 50%; border: 1px solid #ccc; background: #e8e8e8;
+          color: #999; font-size: 0.75rem; cursor: pointer; z-index: 50;
+          display: flex; align-items: center; justify-content: center; padding: 0; }
+  #citytoggle:hover { background: #ddd; }
+  #citytoggle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
   footer { border-top: 1px solid #ddd; background: #fff; text-align: center;
           padding: 16px; color: #333; font-size: 0.9rem; }
   .hidden { display: none; }
@@ -184,9 +190,16 @@
   </div>
 </main>
 <footer>© 2026 ASAHIKAWA Search. All rights reserved.</footer>
+<button id="citytoggle" title=""><span>F</span></button>
 
 <script type="module">
 const PER_PAGE = 10;
+let cityMode = 'asahikawa';
+const CITY = {
+  asahikawa: { pf: './pagefind/pagefind.js', name: '旭川', ph: '旭川の情報を検索' },
+  fukagawa:  { pf: './fukagawa/pagefind/pagefind.js', name: '深川', ph: '深川の情報を検索' }
+};
+const pfCache = {};
 let pagefind = null;
 let results = [];
 let page = 1;
@@ -204,11 +217,12 @@ const pagerEl = document.getElementById('pager');
 const isMobile = () => matchMedia('(max-width: 768px)').matches;
 
 async function ensurePagefind() {
-  if (!pagefind) {
-    pagefind = await import("./pagefind/pagefind.js");
-    await pagefind.init();
+  if (!pfCache[cityMode]) {
+    const mod = await import(CITY[cityMode].pf);
+    await mod.init();
+    pfCache[cityMode] = mod;
   }
-  return pagefind;
+  return pfCache[cityMode];
 }
 
 const KCARDS = [
@@ -226,6 +240,7 @@ const KCARDS = [
 let kTimer = null;
 function renderKCard(term) {
   if (kTimer) { clearInterval(kTimer); kTimer = null; }
+  if (cityMode !== 'asahikawa') { kcardEl.innerHTML = ''; return; }
   const key = term.replace(/[\s\u3000]/g, '');
   const card = KCARDS.find(c => c.aliases.includes(key));
   if (!card) { kcardEl.innerHTML = ''; return; }
@@ -360,9 +375,10 @@ q.addEventListener('keydown', (e) => {
 
 document.querySelectorAll('.engines button').forEach(btn => {
   btn.addEventListener('click', () => {
+    const cname = CITY[cityMode].name;
     let t = q.value.trim();
-    if (!t) t = '旭川';
-    else if (!t.includes('旭川')) t = '旭川 ' + t;
+    if (!t) t = cname;
+    else if (!t.includes(cname)) t = cname + ' ' + t;
     window.open(btn.dataset.url + encodeURIComponent(t), '_blank');
   });
 });
@@ -382,6 +398,18 @@ rot.querySelectorAll('button').forEach((btn, i) => {
 });
 document.addEventListener('click', (e) => {
   if (!rot.contains(e.target)) rot.classList.remove('open');
+});
+
+// 隠し要素:左下の丸で旭川⇔深川を切り替え
+const cityBtn = document.getElementById('citytoggle');
+cityBtn.addEventListener('click', () => {
+  cityMode = (cityMode === 'asahikawa') ? 'fukagawa' : 'asahikawa';
+  cityBtn.querySelector('span').textContent = (cityMode === 'asahikawa') ? 'F' : 'A';
+  q.placeholder = CITY[cityMode].ph;
+  const term = q.value.trim();
+  if (term && document.body.classList.contains('search-mode')) {
+    doSearch(term);
+  }
 });
 
 document.querySelectorAll('.chip').forEach(chip => {
