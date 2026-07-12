@@ -135,6 +135,25 @@
           font-size: 0.9rem; padding: 10px 12px; border-bottom: 3px solid transparent;
           white-space: nowrap; }
   #tabs .tab.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
+  /* ニュースパネル */
+  #news { display: none; padding: 8px 0 40px; max-width: 720px; }
+  body.news-mode #news { display: block; }
+  body.news-mode #count, body.news-mode #results,
+  body.news-mode #popular, body.news-mode #pager, body.news-mode #kcard { display: none !important; }
+  #news h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
+  #news .nitem { display: block; padding: 14px 4px; border-bottom: 1px solid #eee;
+          text-decoration: none; color: inherit; }
+  #news .nitem:hover { background: #f8f9fa; }
+  #news .ntitle { color: #1a0dab; font-size: 1.05rem; line-height: 1.4; }
+  #news .nitem:hover .ntitle { text-decoration: underline; }
+  #news .nmeta { margin-top: 6px; font-size: 0.8rem; color: #5f6368; }
+  #news .nbadge { display: inline-block; padding: 1px 8px; border-radius: 10px;
+          font-size: 0.75rem; margin-right: 8px; color: #fff; }
+  .nbadge.city { background: #1a73e8; }
+  .nbadge.kanko { background: #0f9d58; }
+  .nbadge.jma { background: #d93025; }
+  #news .nupdated { font-size: 0.75rem; color: #9aa0a6; margin-bottom: 12px; }
+  #news .nempty { color: #5f6368; padding: 20px 4px; }
   /* 設定(歯車・型だけ) */
   #gearbtn { display: none; border: none; background: none; cursor: pointer;
           color: #5f6368; padding: 6px; flex-shrink: 0; }
@@ -189,6 +208,7 @@
   <div id="kcard"></div>
   <div id="count"></div>
   <div id="results"></div>
+  <div id="news"></div>
 
   <div id="popular" class="hidden">
     <p>よく調べられているワード</p>
@@ -614,10 +634,52 @@ document.querySelectorAll('.chip').forEach(chip => {
 });
 
 // タブ(型だけ):クリックで見た目のアクティブ切替のみ
+// ニュースタブ + 表示切替
+const BADGE = { '旭川市':'city', '旭川観光協会':'kanko', '気象庁':'jma' };
+let newsLoaded = false;
+function fmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return (d.getMonth()+1) + '月' + d.getDate() + '日';
+}
+async function loadNews(){
+  const box = document.getElementById('news');
+  if(newsLoaded){ return; }
+  box.innerHTML = '<div class="nempty">読み込み中…</div>';
+  try{
+    const res = await fetch('news.json?_=' + Date.now());
+    const data = await res.json();
+    let html = '<h2>📰 旭川エリアの最新情報</h2>';
+    if(data.updated){ html += '<div class="nupdated">最終更新: ' + fmtDate(data.updated) + '</div>'; }
+    if(!data.items || !data.items.length){
+      html += '<div class="nempty">現在お知らせはありません。</div>';
+    } else {
+      for(const it of data.items){
+        const cls = BADGE[it.source] || 'city';
+        html += '<a class="nitem" href="' + it.link + '" target="_blank" rel="noopener">'
+             + '<div class="ntitle">' + it.title + '</div>'
+             + '<div class="nmeta"><span class="nbadge ' + cls + '">' + it.source + '</span>'
+             + fmtDate(it.date) + '</div></a>';
+      }
+    }
+    box.innerHTML = html;
+    newsLoaded = true;
+  }catch(e){
+    box.innerHTML = '<div class="nempty">ニュースを読み込めませんでした。</div>';
+  }
+}
 document.querySelectorAll('#tabs .tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('#tabs .tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
+    const label = t.textContent.trim();
+    if(label === 'ニュース'){
+      document.body.classList.add('news-mode');
+      loadNews();
+    } else {
+      document.body.classList.remove('news-mode');
+    }
   });
 });
 </script>
