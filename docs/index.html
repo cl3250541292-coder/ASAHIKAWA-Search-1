@@ -853,8 +853,9 @@ async function loadAlert(){
       + '　<a class="a-link" href="https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=012000" target="_blank" rel="noopener">気象庁で詳しく見る</a></div>';
   }catch(e){ }
 }
-loadAlert();
-setInterval(loadAlert, 5 * 60 * 1000);
+// [緊急ヘッダー無効化中] 復活するには次の2行の先頭の // を外す
+// loadAlert();
+// setInterval(loadAlert, 5 * 60 * 1000);
 </script>
 </body>
 </html>
