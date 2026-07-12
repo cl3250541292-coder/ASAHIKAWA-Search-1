@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASAHIKAWA Search 1 - 旭川特化検索</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: sans-serif; margin: 0; min-height: 100vh;
+         display: flex; flex-direction: column; background: #fff; }
+  main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  /* ===== ヘッダー(ホーム時:中央大ロゴ / 検索時:横並び) ===== */
+  .logo { background: #888; color: #fff; display: flex;
+          align-items: center; justify-content: center; border-radius: 4px; }
+  body.home-mode header { padding: 16px; }
+  body.home-mode .logo { width: 240px; height: 80px; font-size: 1.5rem; margin: 40px auto 24px; }
+  body.home-mode .searchbox { max-width: 688px; margin: 0 auto; }
+
+  body.search-mode header { display: flex; align-items: center; gap: 20px;
+          padding: 12px 20px; border-bottom: 1px solid #ccc; }
+  body.search-mode .logo { width: 140px; height: 48px; font-size: 1.1rem; flex-shrink: 0; }
+  body.search-mode .searchbox { flex: 1; max-width: 620px; }
+
+  .searchbox { display: flex; align-items: center; gap: 8px; border: 1px solid #ccc;
+          border-radius: 24px; padding: 10px 18px; background: #fff; }
+  .searchbox svg { width: 18px; height: 18px; flex-shrink: 0; stroke: #777; }
+  .searchbox input { flex: 1; border: none; outline: none; font-size: 1rem; min-width: 0; }
+  #clearbtn { display: none; border: none; background: none; cursor: pointer;
+          color: #70757a; font-size: 1.4rem; line-height: 1; padding: 0 4px;
+          flex: 0 0 auto; }
+  #clearbtn:hover { color: #202124; }
+  #clearbtn.show { display: block; }
+
+  #rotator { display: flex; align-items: center; gap: 0; flex-shrink: 0; }
+  #rotator button { background: none; border: none; cursor: pointer; padding: 5px;
+          width: 0; opacity: 0; overflow: hidden; pointer-events: none;
+          transition: width 0.25s, opacity 0.25s; }
+  #rotator button img { width: 30px; height: 30px; display: block; }
+  #rotator button:first-child { width: 40px; opacity: 1; pointer-events: auto; }
+  #rotator:hover button, #rotator.open button {
+          width: 40px; opacity: 1; pointer-events: auto; }
+  #rotator button:hover img { transform: scale(1.15); }
+  body.home-mode header { display: flex; flex-direction: column; align-items: center; }
+  body.home-mode .hrow { display: flex; align-items: center; gap: 10px;
+          width: 100%; max-width: 740px; }
+  body.home-mode .hrow .searchbox { flex: 1; }
+  body.search-mode .hrow { display: flex; align-items: center; gap: 10px; flex: 1;
+          max-width: 660px; }
+  body.search-mode .hrow .searchbox { flex: 1; }
+  @media (max-width: 768px) {
+    #rotator img { width: 26px; height: 26px; }
+  }
+  .engines { display: flex; justify-content: center; gap: 16px; margin: 24px 0 8px; flex-wrap: wrap; }
+  .engines button { background: none; border: 1px solid #ddd; border-radius: 12px;
+          padding: 10px 6px; cursor: pointer; width: 84px;
+          display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .engines button:hover { background: #f2f2f2; }
+  .engines img { width: 32px; height: 32px; display: block; }
+  .engines .label { font-size: 0.65rem; color: #555; white-space: nowrap; }
+  .note { color: #666; font-size: 0.8rem; text-align: center; }
+
+  #popular { margin: 32px 0 8px; }
+  #popular p { font-size: 0.9rem; color: #333; }
+  .chip { background: #e8e8e8; border: none; border-radius: 6px;
+          padding: 8px 20px; margin: 4px 8px 4px 0; cursor: pointer; font-size: 0.95rem; }
+  .chip:hover { background: #ddd; }
+
+  #count { font-weight: bold; margin: 20px 0 0; }
+  .kcard { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 20px 0 4px; }
+  .kslide { position: relative; margin-bottom: 12px; }
+  .kslide img { width: 100%; height: 260px; object-fit: cover; border-radius: 8px;
+          display: none; }
+  .kslide img.active { display: block; }
+  .kbars { position: absolute; top: 8px; left: 14px; right: 14px;
+          display: flex; gap: 4px; }
+  .kbars span { flex: 1; height: 3px; border-radius: 2px;
+          background: rgba(255,255,255,0.45); }
+  .kbars span.done { background: rgba(255,255,255,0.95); }
+  @media (max-width: 768px) {
+    body.search-mode header { flex-direction: column; align-items: stretch; gap: 10px; }
+    body.search-mode .logo { width: 140px; height: 48px; margin: 0 auto; }
+    body.search-mode .searchbox { max-width: none; }
+    .kslide img { height: 200px; }
+  }
+  @media (min-width: 769px) {
+    body.search-mode main { display: grid; max-width: 1120px;
+          grid-template-columns: minmax(0, 1fr) 360px;
+          column-gap: 36px; align-items: start; }
+    body.search-mode #kcard { grid-column: 2; grid-row: 1 / span 6; }
+    body.search-mode #count, body.search-mode #results,
+    body.search-mode #popular, body.search-mode #pager,
+    body.search-mode #home { grid-column: 1; }
+    body.search-mode .kcard { margin-top: 0; }
+    body.search-mode .kslide img { height: 170px; }
+    body.search-mode .kcard .ktitle { font-size: 1.1rem; }
+  }
+  .kcard .ktitle { font-size: 1.25rem; font-weight: bold; color: #1a0dab; text-decoration: none; }
+  .kcard .ktitle:hover { text-decoration: underline; }
+  .kcard .kyomi { color: #666; font-size: 0.85rem; margin: 2px 0 8px; }
+  .kcard .kdesc { color: #333; font-size: 0.92rem; line-height: 1.6; margin: 0 0 8px; }
+  .kcard .ksource { color: #999; font-size: 0.72rem; margin: 0; }
+  .result { padding: 20px 0; }
+  .site { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .site img { width: 26px; height: 26px; border: 1px solid #eee; border-radius: 50%;
+          background: #fff; padding: 3px; }
+  .sitename { font-size: 0.85rem; color: #202124; }
+  .siteurl { font-size: 0.8rem; color: #4d5156; word-break: break-all; }
+  .rtitle { font-size: 1.15rem; font-weight: normal; color: #1a0dab; text-decoration: none;
+          display: block; margin: 2px 0 4px; }
+  .rtitle:hover { text-decoration: underline; }
+  .excerpt { color: #4d5156; font-size: 0.9rem; line-height: 1.6; margin: 0;
+          display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+          overflow: hidden; }
+  .excerpt mark { background: #ff0; }
+
+  #pager { display: flex; justify-content: center; align-items: center;
+          gap: 14px; margin: 20px 0 28px; flex-wrap: wrap; }
+  #pager a { color: #1a0dab; text-decoration: underline; cursor: pointer; font-size: 1.05rem; }
+  #pager .cur { font-weight: bold; color: #000; text-decoration: none; }
+  #loadmore { display: block; width: 100%; padding: 14px; margin: 20px 0;
+          border: 1px solid #ccc; border-radius: 8px; background: #fff;
+          cursor: pointer; font-size: 1rem; }
+  #citytoggle { position: fixed; left: 14px; bottom: 14px; width: 30px; height: 30px;
+          border-radius: 50%; border: 1px solid #ccc; background: #e8e8e8;
+          color: #999; font-size: 0.75rem; cursor: pointer; z-index: 50;
+          display: flex; align-items: center; justify-content: center; padding: 0; }
+  #citytoggle:hover { background: #ddd; }
+  #citytoggle img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  /* タブ(検索結果画面のみ・型だけ) */
+  #tabs { display: none; }
+  body.search-mode #tabs { display: flex; gap: 28px; padding: 0 24px;
+          border-bottom: 1px solid #ddd; background: #fff; overflow-x: auto; }
+  #tabs .tab { border: none; background: none; cursor: pointer; color: #5f6368;
+          font-size: 0.9rem; padding: 10px 2px; border-bottom: 3px solid transparent;
+          white-space: nowrap; }
+  #tabs .tab.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
+  /* ニュースパネル */
+  #news { display: none; padding: 8px 0 40px; max-width: 720px; }
+  body.news-mode #news { display: block; }
+  #weather { display: none; padding: 8px 0 40px; max-width: 720px; }
+  body.weather-mode #weather { display: block; }
+  body.weather-mode #count, body.weather-mode #results,
+  body.weather-mode #popular, body.weather-mode #pager, body.weather-mode #kcard { display: none !important; }
+  body.news-mode #count, body.news-mode #results,
+  body.news-mode #popular, body.news-mode #pager, body.news-mode #kcard { display: none !important; }
+  #news h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
+  #news .nitem { display: block; padding: 14px 4px; border-bottom: 1px solid #eee;
+          text-decoration: none; color: inherit; }
+  #news .nitem:hover { background: #f8f9fa; }
+  #news .ntitle { color: #1a0dab; font-size: 1.05rem; line-height: 1.4; }
+  #news .nitem:hover .ntitle { text-decoration: underline; }
+  #news .nmeta { margin-top: 6px; font-size: 0.8rem; color: #5f6368; }
+  #news .nbadge { display: inline-block; padding: 1px 8px; border-radius: 10px;
+          font-size: 0.75rem; margin-right: 8px; color: #fff; }
+  .nbadge.city { background: #1a73e8; }
+  .nbadge.kanko { background: #0f9d58; }
+  .nbadge.jma { background: #d93025; }
+  #news .nupdated { font-size: 0.75rem; color: #9aa0a6; margin-bottom: 12px; }
+  #news .nempty { color: #5f6368; padding: 20px 4px; }
+  #weather h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
+  #weather .nitem { display: block; padding: 14px 4px; border-bottom: 1px solid #eee;
+          text-decoration: none; color: inherit; }
+  #weather .nitem:hover { background: #f8f9fa; }
+  #weather .ntitle { color: #1a0dab; font-size: 1.05rem; line-height: 1.4; }
+  #weather .nitem:hover .ntitle { text-decoration: underline; }
+  #weather .nmeta { margin-top: 6px; font-size: 0.8rem; color: #5f6368; }
+  #weather .nbadge { display: inline-block; padding: 1px 8px; border-radius: 10px;
+          font-size: 0.75rem; margin-right: 8px; color: #fff; }
+  #weather .nupdated { font-size: 0.75rem; color: #9aa0a6; margin-bottom: 12px; }
+  #weather .nempty { color: #5f6368; padding: 20px 4px; }
+  #weather .nbody { margin-top: 6px; font-size: 0.88rem; line-height: 1.6; color: #3c4043; }
+  #jmaModal .warn { margin: 0 0 12px; padding: 12px 14px; background: #fef7f0;
+          border-left: 3px solid #d93025; border-radius: 4px; font-size: 0.88rem;
+          line-height: 1.6; color: #3c4043; }
+  /* 気象庁 出典モーダル */
+  #jmaModal { display: none; position: fixed; inset: 0; z-index: 1000;
+          background: rgba(32,33,36,0.55); align-items: center; justify-content: center;
+          padding: 20px; }
+  #jmaModal.open { display: flex; }
+  #jmaModal .box { background: #fff; border-radius: 8px; max-width: 460px; width: 100%;
+          box-shadow: 0 8px 28px rgba(0,0,0,0.18); overflow: hidden; }
+  #jmaModal .head { padding: 20px 24px 12px; border-bottom: 1px solid #ececec; }
+  #jmaModal .head h3 { margin: 0; font-size: 1.05rem; color: #202124; font-weight: 600; }
+  #jmaModal .head .src { margin-top: 4px; font-size: 0.78rem; color: #9aa0a6; }
+  #jmaModal .body { padding: 18px 24px; font-size: 0.9rem; line-height: 1.7; color: #3c4043; }
+  #jmaModal .body .subj { font-weight: 600; color: #202124; margin-bottom: 8px; }
+  #jmaModal .actions { padding: 8px 24px 22px; display: flex; flex-direction: column; gap: 10px; }
+  #jmaModal .btn { display: block; width: 100%; text-align: center; padding: 11px 16px;
+          border-radius: 6px; font-size: 0.9rem; cursor: pointer; text-decoration: none;
+          box-sizing: border-box; border: 1px solid transparent; }
+  #jmaModal .btn-primary { background: #1a73e8; color: #fff; }
+  #jmaModal .btn-primary:hover { background: #1765cc; }
+  #jmaModal .btn-outline { background: #fff; color: #1a73e8; border-color: #dadce0; }
+  #jmaModal .btn-outline:hover { background: #f8f9fa; }
+  #jmaModal .btn-text { background: none; color: #5f6368; padding: 6px; }
+  #jmaModal .btn-text:hover { color: #202124; }
+  /* 設定(歯車・型だけ) */
+  #gearbtn { display: none; border: none; background: none; cursor: pointer;
+          color: #5f6368; padding: 6px; flex-shrink: 0; }
+  body.search-mode #gearbtn { display: block; }
+  #gearbtn svg { width: 24px; height: 24px; display: block; }
+  footer { border-top: 1px solid #ddd; background: #fff; text-align: center;
+          padding: 16px; color: #333; font-size: 0.9rem; }
+  .hidden { display: none; }
+
+  /* 緊急ヘッダー(警報時のみ・ホーム最上部・公的サイト風) */
+  #alertBar { display: none; width: 100%; box-sizing: border-box;
+          padding: 16px 20px; font-family: inherit; color: #fff; }
+  #alertBar.show { display: block; }
+  #alertBar.lv3 { background: rgb(255,40,0); }
+  #alertBar.lv4 { background: rgb(170,0,170); }
+  #alertBar.lv5 { background: rgb(12,0,12); }
+  #alertBar .a-label { display: inline-block; font-size: 0.78rem; font-weight: 700;
+          letter-spacing: 0.04em; padding: 2px 9px; border-radius: 3px;
+          background: rgba(255,255,255,0.22); color: #fff; margin-right: 9px; vertical-align: 2px; }
+  #alertBar .a-title { font-size: 1.08rem; font-weight: 700; line-height: 1.5; color: #fff; }
+  #alertBar .a-body { margin-top: 6px; font-size: 0.9rem; font-weight: 700;
+          line-height: 1.65; color: #ffff00; }
+  #alertBar .a-src { margin-top: 8px; font-size: 0.76rem; color: rgba(255,255,255,0.9); }
+  #alertBar a.a-link { color: #fff; text-decoration: underline; font-weight: 700; }
+</style>
+</head>
+<body class="home-mode">
+<div id="alertBar"></div>
+<header>
+  <div class="logo">ロゴ</div>
+  <div class="hrow">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+      </svg>
+      <input id="q" type="text" placeholder="旭川の情報を検索">
+      <button id="clearbtn" type="button" title="入力を消す" aria-label="入力を消す">&#10005;</button>
+    </div>
+    <div id="rotator">
+      <button data-url="https://www.google.com/" title="Googleを開く">
+        <img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google">
+      </button>
+      <button data-url="https://www.bing.com/" title="Bingを開く">
+        <img src="https://www.google.com/s2/favicons?domain=bing.com&sz=64" alt="Bing">
+      </button>
+      <button data-url="https://www.yahoo.co.jp/" title="Yahoo! JAPANを開く">
+        <img src="https://www.google.com/s2/favicons?domain=yahoo.co.jp&sz=64" alt="Yahoo! JAPAN">
+      </button>
+      <button data-url="https://duckduckgo.com/" title="DuckDuckGoを開く">
+        <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64" alt="DuckDuckGo">
+      </button>
+      <button data-url="https://search.brave.com/" title="Brave Searchを開く">
+        <img src="https://www.google.com/s2/favicons?domain=search.brave.com&sz=64" alt="Brave Search">
+      </button>
+    </div>
+  </div>
+  <button id="gearbtn" type="button" title="設定" aria-label="設定">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+  </button>
+</header>
+<div id="tabs">
+  <button class="tab active" type="button">すべて</button>
+  <button class="tab" type="button">動画</button>
+  <button class="tab" type="button">地図</button>
+  <button class="tab" type="button">ニュース</button>
+  <button class="tab" type="button">気象情報</button>
+</div>
+<main>
+  <div id="kcard"></div>
+  <div id="count"></div>
+  <div id="results"></div>
+  <div id="news"></div>
+  <div id="weather"></div>
+  <div id="jmaModal" role="dialog" aria-modal="true" aria-labelledby="jmaTitle">
+    <div class="box">
+      <div class="head">
+        <h3 id="jmaTitle">気象庁 防災情報</h3>
+        <div class="src">出典：気象庁</div>
+      </div>
+      <div class="body">
+        <div class="subj" id="jmaSubj"></div>
+        <div class="warn" id="jmaWarn"></div>
+        <p>この情報は、気象庁が発表する防災情報XMLに基づいています。最新かつ詳細な内容は、気象庁の公式ページでご確認ください。</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" id="jmaOfficial" href="#" target="_blank" rel="noopener">気象庁で詳しく見る（上川地方）</a>
+        <a class="btn btn-outline" id="jmaRaw" href="#" target="_blank" rel="noopener">元データ（XML）を表示</a>
+        <button class="btn btn-text" id="jmaClose" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="popular" class="hidden">
+    <p>よく調べられているワード</p>
+    <button class="chip">旭川観光</button>
+    <button class="chip">旭川ラーメン</button>
+    <button class="chip">旭川家具</button>
+    <button class="chip">旭山動物園</button>
+  </div>
+  <div id="pager"></div>
+
+  <div id="home">
+    <div class="engines" id="engines">
+      <button data-url="https://www.google.com/search?q=" title="Googleで検索">
+        <img src="https://www.google.com/s2/favicons?domain=google.com&sz=64" alt="Google"><span class="label">Google</span>
+      </button>
+      <button data-url="https://www.bing.com/search?q=" title="Bingで検索">
+        <img src="https://www.google.com/s2/favicons?domain=bing.com&sz=64" alt="Bing"><span class="label">Bing</span>
+      </button>
+      <button data-url="https://duckduckgo.com/?q=" title="DuckDuckGoで検索">
+        <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64" alt="DuckDuckGo"><span class="label">DuckDuckGo</span>
+      </button>
+      <button data-url="https://ja.wikipedia.org/w/index.php?search=" title="Wikipediaで検索">
+        <img src="https://www.google.com/s2/favicons?domain=ja.wikipedia.org&sz=64" alt="Wikipedia"><span class="label">Wikipedia</span>
+      </button>
+    </div>
+    <p class="note">アイコンをクリックすると、入力した言葉を各検索エンジンで開きます(「旭川」を自動追加)</p>
+  </div>
+</main>
+<footer>© 2026 ASAHIKAWA Search. All rights reserved.</footer>
+<button id="citytoggle" title=""><span>F</span></button>
+
+<script type="module">
+const PER_PAGE = 10;
+let cityMode = 'asahikawa';
+const CITY = {
+  asahikawa: { pf: './pagefind/pagefind.js', name: '旭川', ph: '旭川の情報を検索' },
+  fukagawa:  { pf: './fukagawa/pagefind/pagefind.js', name: '北海道深川市', ph: '深川の情報を検索' }
+};
+const pfCache = {};
+let pagefind = null;
+let results = [];
+let page = 1;
+let loaded = 0;
+let lastTerm = "";
+
+const q = document.getElementById('q');
+const home = document.getElementById('home');
+const popular = document.getElementById('popular');
+const countEl = document.getElementById('count');
+const kcardEl = document.getElementById('kcard');
+const resultsEl = document.getElementById('results');
+const pagerEl = document.getElementById('pager');
+
+const isMobile = () => matchMedia('(max-width: 768px)').matches;
+
+async function ensurePagefind() {
+  if (!pfCache[cityMode]) {
+    const mod = await import(CITY[cityMode].pf);
+    await mod.init();
+    pfCache[cityMode] = mod;
+  }
+  return pfCache[cityMode];
+}
+
+const KCARDS = [
+  {
+    aliases: ["旭川", "旭川市", "あさひかわ", "ASAHIKAWA", "asahikawa", "Asahikawa"],
+    title: "旭川市",
+    yomi: "あさひかわし(北海道の市)",
+    url: "https://www.city.asahikawa.hokkaido.jp/",
+    desc: "北海道のほぼ中央に位置する道北の中心都市。大雪山連峰を望み、旭橋や平和通買物公園、旭山動物園などで知られる。",
+    photos: ["photos/asahibasi.jpg", "photos/pennginnsannpo.jpg", "photos/maruneko.jpg",
+             "photos/yukimaturi.jpg", "photos/tabemarusyle.jpg", "photos/ramen01.jpg"],
+    city: "asahikawa"
+  },
+  {
+    aliases: ["asatan", "ASATAN", "アサタン", "あさたん"],
+    title: "asatan(アサタン)",
+    yomi: "旭川の生活情報メディア",
+    url: "https://asatan.com/",
+    desc: "旭川のグルメ・観光・ショップ・イベント情報を発信する地域メディア。"
+  },
+  {
+    aliases: ["道の駅", "道の駅あさひかわ"],
+    title: "道の駅あさひかわ",
+    yomi: "旭川市神楽・国道237号沿い",
+    url: "https://www.asahikawa-jibasan.com/idp/station/",
+    desc: "JR旭川駅から徒歩圏の道の駅。道北の特産品売店や旭川ラーメンのフードコートがある。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["道の駅", "道の駅ライスランドふかがわ", "ライスランドふかがわ", "ライスランド"],
+    title: "道の駅ライスランドふかがわ",
+    yomi: "深川市音江町・国道12号沿い",
+    url: "https://riceland-fukagawa.com/",
+    desc: "「お米のまち深川」がテーマの道の駅。深川産米のおにぎりや釜飯、農産物直売所が人気。",
+    city: "fukagawa"
+  },
+  {
+    aliases: ["JR北海道", "jr北海道", "JR", "jr", "ジェイアール"],
+    title: "JR北海道",
+    yomi: "北海道旅客鉄道",
+    url: "https://www.jrhokkaido.co.jp/",
+    desc: "時刻表・運行情報・きっぷの案内はこちら。旭川駅・深川駅は函館本線などの主要駅。"
+  },
+  {
+    aliases: ["道北バス", "どうほくバス"],
+    title: "道北バス",
+    yomi: "旭川・道北の路線バス",
+    url: "https://www.dohokubus.com/",
+    desc: "旭川市内・道北エリアの路線バスと都市間バスを運行。路線図・時刻表はこちら。"
+  },
+  {
+    aliases: ["旭川電気軌道", "電気軌道", "でんきどう"],
+    title: "旭川電気軌道",
+    yomi: "旭川の路線バス",
+    url: "https://www.asahikawa-denkikidou.jp/",
+    desc: "旭川市内の路線バスを運行。旭山動物園方面へのバスもこちら。"
+  },
+  {
+    aliases: ["まちなかキャンパス"],
+    title: "まちなかキャンパス",
+    yomi: "旭川平和通買物公園で開催される学びの祭典",
+    url: "https://www.machinakacampus.net/",
+    desc: "高校生・高専生・大学生がデザインやSDGsの探究を発表し、子どもたちと学び合うイベント。毎年6月開催。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["イオン"],
+    title: "イオン(旭川市内の店舗一覧)",
+    yomi: "イオン北海道 公式店舗検索",
+    url: "https://map.aeon-hokkaido.jp/ah-store/spot/list?address=01204&search=address",
+    desc: "旭川市内のイオン・ザビッグ全店舗の営業時間やチラシを確認できる公式ページ。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["イオンモール旭川駅前", "駅前イオン", "イオン駅前", "イオン旭川駅前"],
+    title: "イオンモール旭川駅前",
+    yomi: "JR旭川駅直結",
+    url: "https://asahikawaekimae-aeonmall.com/",
+    desc: "旭川駅直結のショッピングモール。専門店・映画館(イオンシネマ)・フードコートがある。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["イオンモール旭川西", "西イオン", "イオン旭川西", "イオン西"],
+    title: "イオンモール旭川西",
+    yomi: "旭川市緑町",
+    url: "https://asahikawanishi-aeonmall.com/",
+    desc: "道北最大級のショッピングモール。専門店やフードコートが充実。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["イオン旭川春光", "春光イオン", "イオン春光"],
+    title: "イオン旭川春光ショッピングセンター",
+    yomi: "旭川市春光町",
+    url: "https://aeonasahikawashunko.com/",
+    desc: "春光町のショッピングセンター。専門店街SHUNKO PARKを併設。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["イオン旭川永山", "永山イオン", "イオン永山"],
+    title: "イオン旭川永山店",
+    yomi: "旭川市永山3条",
+    url: "https://www.aeon-hokkaido.jp/aeon/shop/nagayama/",
+    desc: "永山地区のイオン。営業時間・チラシ・フロアガイドはこちら。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["上川神社", "かみかわじんじゃ"],
+    title: "上川神社",
+    yomi: "かみかわじんじゃ・神楽岡公園",
+    url: "https://www.kamikawajinja.com/",
+    desc: "神楽岡に鎮座する上川地方開拓守護の神社。毎年7月の上川神社祭は旭川を代表する祭り。",
+    city: "asahikawa"
+  },
+  {
+    aliases: ["農道音楽祭", "nouon", "のうおん", "ノウオン"],
+    title: "農道音楽祭 -nouon-",
+    yomi: "のうおん・深川市の音楽と食の野外フェス",
+    url: "https://nouon.jp/",
+    desc: "米どころ深川で市民有志が立ち上げた野外フェス。田園風景の中で音楽と食を楽しめる。",
+    city: "fukagawa"
+  },
+  {
+    aliases: ["図書館", "深川図書館", "深川市立図書館"],
+    title: "深川市立図書館",
+    yomi: "深川市生きがい文化センター1階",
+    url: "https://ikibun.com/library/",
+    desc: "蔵書検索・開館カレンダー・移動図書館らんらん号の情報はこちら。",
+    city: "fukagawa"
+  },
+  {
+    aliases: ["クラーク", "クラーク記念国際高等学校", "クラーク国際", "クラーク高校"],
+    title: "クラーク記念国際高等学校",
+    yomi: "本校:深川市納内町",
+    url: "https://www.clark.ed.jp/",
+    desc: "クラーク博士の精神を受け継ぐ広域通信制高校。本校は深川市に所在し、全国にキャンパスを展開。",
+    city: "fukagawa"
+  },
+  {
+    aliases: ["クラークwebキャンパス", "クラークWebキャンパス", "webキャンパス", "Webキャンパス"],
+    title: "クラークWebキャンパス",
+    yomi: "在校生用学習システム",
+    url: "https://campus.clark.ed.jp/",
+    desc: "クラーク記念国際高等学校の在校生用Web学習システムのログインページ。",
+    city: "fukagawa"
+  }
+]
+
+let kTimer = null;
+let topLinkHtml = '';
+function renderKCard(term) {
+  if (kTimer) { clearInterval(kTimer); kTimer = null; }
+  kcardEl.innerHTML = '';
+  topLinkHtml = '';
+  const key = term.replace(/[\s\u3000]/g, '');
+  const card = KCARDS.find(c => c.aliases.includes(key) && (!c.city || c.city === cityMode));
+  if (!card) return;
+
+  if (card.photos && card.photos.length > 0) {
+    // 写真ありはこれまで通りのカード(旭川スライドショー)
+    const imgs = card.photos.map((p, i) =>
+      `<img src="${p}" alt="${card.title}" class="${i === 0 ? 'active' : ''}">`).join('');
+    const bars = card.photos.map((p, i) =>
+      `<span class="${i === 0 ? 'done' : ''}"></span>`).join('');
+    kcardEl.innerHTML = `<div class="kcard">
+      <div class="kslide">${imgs}<div class="kbars">${bars}</div></div>
+      <a class="ktitle" href="${card.url}" target="_blank" rel="noopener">${card.title}</a>
+      <p class="kyomi">${card.yomi}</p>
+      <p class="kdesc">${card.desc}</p>
+      <p class="ksource">写真提供:旭川市フォトライブラリー ・ リンク先:公式サイト</p>
+    </div>`;
+    const slides = kcardEl.querySelectorAll('.kslide img');
+    if (slides.length > 1) {
+      let idx = 0;
+      const barEls = kcardEl.querySelectorAll('.kbars span');
+      kTimer = setInterval(() => {
+        slides[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+        barEls.forEach((b, i) => b.classList.toggle('done', i <= idx));
+        if (idx === 0) barEls.forEach((b, i) => b.classList.toggle('done', i === 0));
+      }, 4000);
+    }
+  } else {
+    // 写真なしは通常の検索結果と同じ見た目で、結果リストの先頭に差し込む
+    let domain = '';
+    try { domain = new URL(card.url).hostname; } catch(e) {}
+    topLinkHtml = `<div class="result">
+      <div class="site">
+        <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="">
+        <div><div class="sitename">${card.title}</div><div class="siteurl">${card.url}</div></div>
+      </div>
+      <a class="rtitle" href="${card.url}" target="_blank" rel="noopener">${card.title} - 公式サイト</a>
+      <p class="excerpt">${card.desc}</p>
+    </div>`;
+  }
+}
+
+async function doSearch(term) {
+  lastTerm = term;
+  clearBtn.classList.remove('show');  // 検索実行で×を隠す(Google式)
+  renderKCard(term);
+  const pf = await ensurePagefind();
+  const res = await pf.search(term, { excerptLength: 60 });
+  // トップページ・浅い階層のページを優先する並べ替え
+  const scored = await Promise.all(res.results.map(async r => {
+    const d = await r.data();
+    const url = (d.meta && d.meta.url) || d.url || '';
+    let depth = 9;
+    try { depth = new URL(url).pathname.split('/').filter(Boolean).length; } catch(e) {}
+    // Pagefindの元の並び(index)を基礎に、階層の浅さで加点
+    return { r, d, depth };
+  }));
+  scored.sort((a, b) => {
+    const sa = scored.indexOf(a) - (a.depth <= 1 ? 50 : a.depth <= 2 ? 10 : 0);
+    const sb = scored.indexOf(b) - (b.depth <= 1 ? 50 : b.depth <= 2 ? 10 : 0);
+    return sa - sb;
+  });
+  results = scored.map(s => s.r);
+  page = 1;
+  loaded = PER_PAGE;
+  render();
+}
+
+async function render() {
+  const total = results.length;
+  countEl.textContent = total
+    ? `「${lastTerm}」の${total}件の検索結果`
+    : `「${lastTerm}」に一致する結果はありませんでした`;
+
+  let start, end;
+  if (isMobile()) { start = 0; end = Math.min(total, loaded); }
+  else { start = (page - 1) * PER_PAGE; end = Math.min(total, start + PER_PAGE); }
+
+  const datas = await Promise.all(results.slice(start, end).map(r => r.data()));
+  resultsEl.innerHTML = topLinkHtml + datas.map(d => {
+    const url = (d.meta && d.meta.url) || d.url;
+    const title = (d.meta && d.meta.title) || url;
+    let domain = '', dispUrl = url;
+    try {
+      const u = new URL(url);
+      domain = u.hostname;
+      const parts = u.pathname.split('/').filter(Boolean);
+      dispUrl = 'https://' + domain + (parts.length ? ' \u203a ' + parts.join(' \u203a ') : '');
+    } catch(e) {}
+    const names = {
+      'www.city.asahikawa.hokkaido.jp': '旭川市',
+      'www.atca.jp': '旭川観光コンベンション協会'
+    };
+    const siteName = names[domain] || domain;
+    return `<div class="result">
+      <div class="site">
+        <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=64" alt="">
+        <div><div class="sitename">${siteName}</div><div class="siteurl">${dispUrl}</div></div>
+      </div>
+      <a class="rtitle" href="${url}" target="_blank" rel="noopener">${title}</a>
+      <p class="excerpt">${d.excerpt}</p>
+    </div>`;
+  }).join('');
+
+  pagerEl.innerHTML = '';
+  if (isMobile()) {
+    if (end < total) {
+      const b = document.createElement('button');
+      b.id = 'loadmore'; b.textContent = '次を読み込む';
+      b.onclick = () => { loaded += PER_PAGE; render(); };
+      pagerEl.appendChild(b);
+    }
+  } else if (total > 0) {
+    const pages = Math.ceil(total / PER_PAGE);
+    if (pages > 1) {
+      const addLink = (n, label, cur) => {
+        const a = document.createElement('a');
+        a.textContent = label || n;
+        if (cur) a.className = 'cur';
+        else a.onclick = () => { page = n; render(); scrollTo(0, 0); };
+        pagerEl.appendChild(a);
+      };
+      let s = Math.max(1, page - 3);
+      let e = Math.min(pages, s + 6);
+      if (s > 1) { addLink(1, '1'); pagerEl.append('…'); }
+      for (let i = s; i <= e; i++) addLink(i, String(i), i === page);
+      if (e < pages) { pagerEl.append('…'); addLink(pages, String(pages)); }
+      if (page < pages) addLink(page + 1, '次へ >');
+    }
+  }
+}
+
+function setMode(searching) {
+  document.body.className = searching ? 'search-mode' : 'home-mode';
+  home.classList.toggle('hidden', searching);
+  popular.classList.toggle('hidden', !searching);
+  if (!searching) { countEl.textContent = ''; resultsEl.innerHTML = ''; pagerEl.innerHTML = ''; kcardEl.innerHTML = ''; topLinkHtml = ''; }
+}
+
+const clearBtn = document.getElementById('clearbtn');
+function updateClearBtn() { clearBtn.classList.toggle('show', q.value.length > 0); }
+q.addEventListener('input', updateClearBtn);
+q.addEventListener('focus', updateClearBtn);  // 検索バーに触れたら再表示
+clearBtn.addEventListener('click', () => {
+  q.value = '';
+  updateClearBtn();
+  q.focus();
+});
+
+q.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const term = q.value.trim();
+  if (!term) { setMode(false); return; }
+  setMode(true);
+  doSearch(term);
+  scrollTo(0, 0);
+});
+
+document.querySelectorAll('.engines button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cname = CITY[cityMode].name;
+    let t = q.value.trim();
+    if (!t) t = cname;
+    else if (!t.includes(cname)) t = cname + ' ' + t;
+    window.open(btn.dataset.url + encodeURIComponent(t), '_blank');
+  });
+});
+
+// エンジン展開ボタン(ホバーで展開、クリックで開く。スマホは1タップ目で展開)
+const rot = document.getElementById('rotator');
+rot.querySelectorAll('button').forEach((btn, i) => {
+  btn.addEventListener('click', () => {
+    const isTouch = matchMedia('(hover: none)').matches;
+    if (isTouch && !rot.classList.contains('open')) {
+      rot.classList.add('open');   // スマホ:1タップ目は展開のみ
+      return;
+    }
+    window.open(btn.dataset.url, '_blank');
+    rot.classList.remove('open');
+  });
+});
+document.addEventListener('click', (e) => {
+  if (!rot.contains(e.target)) rot.classList.remove('open');
+});
+
+// 隠し要素:左下の丸で旭川⇔深川を切り替え
+const cityBtn = document.getElementById('citytoggle');
+cityBtn.addEventListener('click', () => {
+  cityMode = (cityMode === 'asahikawa') ? 'fukagawa' : 'asahikawa';
+  cityBtn.querySelector('span').textContent = (cityMode === 'asahikawa') ? 'F' : 'A';
+  q.placeholder = CITY[cityMode].ph;
+  const term = q.value.trim();
+  if (term && document.body.classList.contains('search-mode')) {
+    doSearch(term);
+  }
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    q.value = chip.textContent;
+    updateClearBtn();
+    setMode(true);
+    doSearch(chip.textContent);
+    scrollTo(0, 0);
+  });
+});
+
+// タブ(型だけ):クリックで見た目のアクティブ切替のみ
+// ニュースタブ + 表示切替
+const BADGE = { '旭川市':'city', '旭川観光協会':'kanko', '気象庁':'jma' };
+const JMA_WARN = 'https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=012000';
+const JMA_FCST = 'https://www.jma.go.jp/bosai/forecast/#area_type=offices&area_code=012000';
+let newsLoaded = false;
+function fmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return (d.getMonth()+1) + '月' + d.getDate() + '日';
+}
+let feedData = null;
+async function fetchFeed(){
+  if(feedData) return feedData;
+  const res = await fetch('news.json?_=' + Date.now());
+  feedData = await res.json();
+  return feedData;
+}
+function metaHtml(it){
+  const cls = BADGE[it.source] || 'city';
+  return '<div class="nmeta"><span class="nbadge ' + cls + '">' + it.source
+       + '</span>' + fmtDate(it.date) + '</div>';
+}
+async function loadNews(){
+  const box = document.getElementById('news');
+  if(newsLoaded){ return; }
+  box.innerHTML = '<div class="nempty">読み込み中…</div>';
+  try{
+    const data = await fetchFeed();
+    const items = (data.items || []).filter(it => it.source !== '気象庁');
+    let html = '<h2>旭川エリアの最新情報</h2>';
+    if(data.updated){ html += '<div class="nupdated">最終更新: ' + fmtDate(data.updated) + '</div>'; }
+    if(!items.length){
+      html += '<div class="nempty">現在お知らせはありません。</div>';
+    } else {
+      for(const it of items){
+        html += '<a class="nitem" href="' + it.link + '" target="_blank" rel="noopener">'
+             + '<div class="ntitle">' + it.title + '</div>' + metaHtml(it) + '</a>';
+      }
+    }
+    box.innerHTML = html;
+    newsLoaded = true;
+  }catch(e){
+    box.innerHTML = '<div class="nempty">情報を読み込めませんでした。</div>';
+  }
+}
+let weatherLoaded = false;
+async function loadWeather(){
+  const box = document.getElementById('weather');
+  if(weatherLoaded){ return; }
+  box.innerHTML = '<div class="nempty">読み込み中…</div>';
+  try{
+    const data = await fetchFeed();
+    const items = (data.items || []).filter(it => it.source === '気象庁');
+    let html = '<h2>気象・防災情報（上川地方）</h2>';
+    if(data.updated){ html += '<div class="nupdated">最終更新: ' + fmtDate(data.updated) + '</div>'; }
+    if(!items.length){
+      html += '<div class="nempty">現在、発表中の気象・防災情報はありません。</div>';
+    } else {
+      for(const it of items){
+        const isFcst = it.title.indexOf('予報') !== -1;
+        const body = it.body ? '<div class="nbody">' + it.body + '</div>' : '';
+        html += '<a class="nitem" href="#" data-jma="1" data-title="'
+             + it.title.replace(/"/g,'&quot;') + '" data-raw="' + it.link
+             + '" data-fcst="' + (isFcst ? '1' : '0')
+             + '" data-body="' + (it.body || '').replace(/"/g,'&quot;') + '">'
+             + '<div class="ntitle">' + it.title + '</div>' + metaHtml(it) + body + '</a>';
+      }
+    }
+    box.innerHTML = html;
+    weatherLoaded = true;
+  }catch(e){
+    box.innerHTML = '<div class="nempty">情報を読み込めませんでした。</div>';
+  }
+}
+document.querySelectorAll('#tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#tabs .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const label = t.textContent.trim();
+    document.body.classList.remove('news-mode', 'weather-mode');
+    if(label === 'ニュース'){
+      document.body.classList.add('news-mode');
+      loadNews();
+    } else if(label === '気象情報'){
+      document.body.classList.add('weather-mode');
+      loadWeather();
+    }
+  });
+});
+
+// 気象庁モーダル制御
+const jmaModal = document.getElementById('jmaModal');
+const jmaSubj = document.getElementById('jmaSubj');
+const jmaOfficial = document.getElementById('jmaOfficial');
+const jmaRaw = document.getElementById('jmaRaw');
+const jmaWarn = document.getElementById('jmaWarn');
+function openJma(title, raw, isFcst, body){
+  jmaSubj.textContent = title;
+  if(body){ jmaWarn.textContent = body; jmaWarn.style.display = 'block'; }
+  else { jmaWarn.style.display = 'none'; }
+  jmaOfficial.href = isFcst ? JMA_FCST : JMA_WARN;
+  jmaRaw.href = raw;
+  jmaModal.classList.add('open');
+}
+function closeJma(){ jmaModal.classList.remove('open'); }
+document.getElementById('weather').addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-jma="1"]');
+  if(!a) return;
+  e.preventDefault();
+  openJma(a.getAttribute('data-title'), a.getAttribute('data-raw'), a.getAttribute('data-fcst') === '1', a.getAttribute('data-body'));
+});
+document.getElementById('jmaClose').addEventListener('click', closeJma);
+jmaModal.addEventListener('click', (e) => { if(e.target === jmaModal) closeJma(); });
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeJma(); });
+
+// 緊急ヘッダー(ホーム最上部・警報時のみ)
+async function loadAlert(){
+  try{
+    const res = await fetch('news.json?_=' + Date.now());
+    const data = await res.json();
+    const al = data.alert;
+    if(!al || !al.level || al.level < 3 || !al.warnings || !al.warnings.length) return;
+    const bar = document.getElementById('alertBar');
+    const wtxt = (al.warnings || []).map(function(w){
+      return 'レベル' + (w.level||al.level) + ' ' + (w.name||w);
+    }).join('・');
+    let t = '';
+    if(al.time){ const d = new Date(al.time);
+      if(!isNaN(d)) t = (d.getMonth()+1)+'月'+d.getDate()+'日 '
+        + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' 発表'; }
+    bar.className = 'show lv' + al.level;
+    const bodyHtml = al.body ? '<div class="a-body">' + al.body + '</div>' : '';
+    bar.innerHTML =
+      '<div class="a-title"><span class="a-label">警戒レベル' + al.level + '相当</span>'
+      + '上川地方　' + wtxt + ' 発表中</div>'
+      + bodyHtml
+      + '<div class="a-src">出典：気象庁　' + t
+      + '　<a class="a-link" href="https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=012000" target="_blank" rel="noopener">気象庁で詳しく見る</a></div>';
+  }catch(e){ }
+}
+loadAlert();
+setInterval(loadAlert, 5 * 60 * 1000);
+</script>
+</body>
+</html>
