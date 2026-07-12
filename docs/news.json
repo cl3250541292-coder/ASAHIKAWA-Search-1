@@ -1,54 +1,54 @@
 {
-  "updated": "2026-07-12T15:15:36.498121+09:00",
+  "updated": "2026-07-12T19:19:13.436907+09:00",
   "items": [
     {
       "title": "上川・留萌地方気象警報・注意報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712053113_0_VPWW54_012000.xml",
-      "date": "2026-07-12T14:31:12+09:00",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712093251_0_VPWW54_012000.xml",
+      "date": "2026-07-12T18:32:50+09:00",
       "source": "気象庁",
-      "body": "上川地方では、低い土地の浸水に警戒してください。"
+      "body": "上川地方では、土砂災害や低い土地の浸水に注意してください。上川・留萌地方では、落雷や濃霧による視程障害に注意してください。"
     },
     {
       "title": "上川・留萌地方大雨警報・注意報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712053039_0_VPWW55_012000.xml",
-      "date": "2026-07-12T14:30:39+09:00",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712093248_0_VPWW55_012000.xml",
+      "date": "2026-07-12T18:32:48+09:00",
       "source": "気象庁",
-      "body": "上川地方では、低い土地の浸水や河川の増水に警戒してください。"
+      "body": "上川地方では、低い土地の浸水や河川の増水に注意してください。"
     },
     {
       "title": "上川・留萌地方警戒・注意事項時系列情報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712015515_0_VPWP50_012000.xml",
-      "date": "2026-07-12T10:55:00+09:00",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712075505_0_VPWP50_012000.xml",
+      "date": "2026-07-12T16:55:00+09:00",
       "source": "気象庁",
       "body": ""
     },
     {
       "title": "上川・留萌地方府県週間天気予報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712014927_0_VPFW50_012000.xml",
-      "date": "2026-07-12T10:49:26+09:00",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712074404_0_VPFW50_012000.xml",
+      "date": "2026-07-12T16:44:03+09:00",
+      "source": "気象庁",
+      "body": ""
+    },
+    {
+      "title": "上川・留萌地方府県天気予報",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712073611_0_VPFD51_012000.xml",
+      "date": "2026-07-12T16:36:10+09:00",
       "source": "気象庁",
       "body": ""
     },
     {
       "title": "上川・留萌地方土砂災害警報・注意報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712014310_0_VPWW56_012000.xml",
-      "date": "2026-07-12T10:43:09+09:00",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712071311_0_VPWW56_012000.xml",
+      "date": "2026-07-12T16:13:11+09:00",
       "source": "気象庁",
-      "body": "上川地方、留萌地方では、土砂災害に注意してください。"
-    },
-    {
-      "title": "上川・留萌地方府県天気予報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712013534_0_VPFD51_012000.xml",
-      "date": "2026-07-12T10:35:34+09:00",
-      "source": "気象庁",
-      "body": ""
+      "body": "上川地方では、土砂災害に注意してください。"
     },
     {
       "title": "上川・留萌地方雷・濃霧注意報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712003248_0_VPWW61_012000.xml",
-      "date": "2026-07-12T09:32:48+09:00",
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712071144_0_VPWW61_012000.xml",
+      "date": "2026-07-12T16:11:44+09:00",
       "source": "気象庁",
-      "body": "上川、留萌地方では、急な強い雨や落雷に注意してください。留萌地方では、濃霧による視程障害に注意してください。"
+      "body": "上川、留萌地方では、急な強い雨や落雷、濃霧による視程障害に注意してください。"
     },
     {
       "title": "報道依頼文書の公開（令和8年7月発表分）",
@@ -231,6 +231,6 @@
       "大雨警報"
     ],
     "level": 3,
-    "time": "2026-07-12T14:31:12+09:00"
+    "time": "2026-07-12T18:32:50+09:00"
   }
 }
