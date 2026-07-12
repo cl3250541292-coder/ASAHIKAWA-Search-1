@@ -203,9 +203,29 @@
   footer { border-top: 1px solid #ddd; background: #fff; text-align: center;
           padding: 16px; color: #333; font-size: 0.9rem; }
   .hidden { display: none; }
+
+  /* 緊急ヘッダー(警報時のみ・ホーム最上部・公的サイト風) */
+  #alertBar { display: none; width: 100%; box-sizing: border-box;
+          padding: 14px 20px 14px 18px; font-family: inherit;
+          background: #f8f4ee; color: #2b2b2b; border-bottom: 1px solid #e5ded4;
+          border-left: 5px solid #c8442e; }
+  #alertBar.show { display: block; }
+  #alertBar.lv3 { border-left-color: #c8442e; }
+  #alertBar.lv4 { border-left-color: #9a2f8f; background: #f7f0f6; border-bottom-color: #e8d9e6; }
+  #alertBar.lv5 { border-left-color: #1a1a1a; background: #f2f0ee; border-bottom-color: #ddd9d4; }
+  #alertBar .a-label { display: inline-block; font-size: 0.72rem; font-weight: 700;
+          letter-spacing: 0.04em; padding: 2px 8px; border-radius: 3px;
+          color: #fff; background: #c8442e; margin-right: 8px; vertical-align: 2px; }
+  #alertBar.lv4 .a-label { background: #9a2f8f; }
+  #alertBar.lv5 .a-label { background: #1a1a1a; }
+  #alertBar .a-title { font-size: 1.02rem; font-weight: 700; line-height: 1.5; }
+  #alertBar .a-body { margin-top: 5px; font-size: 0.85rem; line-height: 1.65; color: #444; }
+  #alertBar .a-src { margin-top: 7px; font-size: 0.75rem; color: #777; }
+  #alertBar a.a-link { color: #1a5fb4; text-decoration: underline; }
 </style>
 </head>
 <body class="home-mode">
+<div id="alertBar"></div>
 <header>
   <div class="logo">ロゴ</div>
   <div class="hrow">
@@ -810,6 +830,30 @@ document.getElementById('weather').addEventListener('click', (e) => {
 document.getElementById('jmaClose').addEventListener('click', closeJma);
 jmaModal.addEventListener('click', (e) => { if(e.target === jmaModal) closeJma(); });
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeJma(); });
+
+// 緊急ヘッダー(ホーム最上部・警報時のみ)
+async function loadAlert(){
+  try{
+    const res = await fetch('news.json?_=' + Date.now());
+    const data = await res.json();
+    const al = data.alert;
+    if(!al || !al.level || al.level < 3 || !al.warnings || !al.warnings.length) return;
+    const bar = document.getElementById('alertBar');
+    const names = al.warnings.join('・');
+    let t = '';
+    if(al.time){ const d = new Date(al.time);
+      if(!isNaN(d)) t = (d.getMonth()+1)+'月'+d.getDate()+'日 '
+        + String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' 発表'; }
+    bar.className = 'show lv' + al.level;
+    bar.innerHTML =
+      '<div class="a-title"><span class="a-label">警戒レベル' + al.level + '相当</span>'
+      + '上川地方　' + names + ' 発表中</div>'
+      + '<div class="a-body">' + names + 'が発表されています。安全の確保に努め、最新の情報を確認してください。</div>'
+      + '<div class="a-src">出典：気象庁　' + t
+      + '　<a class="a-link" href="https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=012000" target="_blank" rel="noopener">気象庁で詳しく見る</a></div>';
+  }catch(e){ }
+}
+loadAlert();
 </script>
 </body>
 </html>

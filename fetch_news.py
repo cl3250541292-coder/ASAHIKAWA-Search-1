@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# 旭川リアルタイム情報局 ニュース取得スクリプト(気象庁の本文つき版)
+# 旭川リアルタイム情報局 ニュース取得スクリプト(気象庁の本文+警報判定つき)
 import json, re, sys, urllib.request, datetime
 from email.utils import parsedate_to_datetime
 import xml.etree.ElementTree as ET
 
 UA = "AsahikawaRealtimeInfo/1.0 (Clark Award student project)"
+LEVEL3 = ["大雨警報","洪水警報","暴風警報","暴風雪警報","大雪警報","波浪警報","高潮警報"]
 
 def fetch(url, timeout=25):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -18,8 +19,7 @@ def parse_rss(xml_bytes, source_name, max_items=15):
     items = []
     root = ET.fromstring(xml_bytes)
     channel = root.find("channel")
-    if channel is None:
-        return items
+    if channel is None: return items
     for it in channel.findall("item")[:max_items]:
         title = (it.findtext("title") or "").strip()
         link = (it.findtext("link") or "").strip()
@@ -45,8 +45,22 @@ def extract_headline(xml_bytes):
                     return child.text.strip()
     return ""
 
+def analyze_alert(xml_bytes):
+    # 警報XMLから発表中の警報名と最高警戒レベルを判定(注意報は除外)
+    try: root = ET.fromstring(xml_bytes)
+    except Exception: return [], 0
+    names = [el.text.strip() for el in root.iter()
+             if el.tag.split('}')[-1]=='Name' and el.text]
+    warnings=[]; max_level=0
+    for n in names:
+        if "特別警報" in n: warnings.append(n); max_level=max(max_level,5)
+        elif n=="土砂災害警戒情報": warnings.append(n); max_level=max(max_level,4)
+        elif n in LEVEL3: warnings.append(n); max_level=max(max_level,3)
+    seen=set(); uniq=[w for w in warnings if not(w in seen or seen.add(w))]
+    return uniq, max_level
+
 def parse_jma(xml_bytes, max_items=6):
-    items = []
+    items = []; alert = {"warnings": [], "level": 0, "time": ""}
     root = ET.fromstring(xml_bytes)
     seen = set()
     for entry in root.findall(f"{ATOM}entry"):
@@ -54,8 +68,7 @@ def parse_jma(xml_bytes, max_items=6):
         content = (entry.findtext(f"{ATOM}content") or "").strip()
         author = ""
         a = entry.find(f"{ATOM}author")
-        if a is not None:
-            author = (a.findtext(f"{ATOM}name") or "").strip()
+        if a is not None: author = (a.findtext(f"{ATOM}name") or "").strip()
         updated = (entry.findtext(f"{ATOM}updated") or "").strip()
         link_el = entry.find(f"{ATOM}link")
         link = link_el.get("href") if link_el is not None else ""
@@ -70,23 +83,27 @@ def parse_jma(xml_bytes, max_items=6):
         if updated:
             try: iso = to_iso(datetime.datetime.fromisoformat(updated.replace("Z","+00:00")))
             except Exception: iso = ""
-        body = ""
+        body = ""; xmlbytes = None
         if link:
-            try: body = extract_headline(fetch(link, timeout=15))
+            try: xmlbytes = fetch(link, timeout=15); body = extract_headline(xmlbytes)
             except Exception: body = ""
+        # 気象警報・注意報の項目から警報レベルを判定(上川地方のみ、最初の1件)
+        if "気象警報・注意報" in title and xmlbytes is not None and alert["level"]==0:
+            w, lv = analyze_alert(xmlbytes)
+            if lv >= 3:
+                alert = {"warnings": w, "level": lv, "time": iso}
         items.append({"title": disp, "link": link, "date": iso, "source": "気象庁", "body": body})
         if len(items) >= max_items: break
-    return items
+    return items, alert
 
 def main():
-    all_items = []
+    all_items = []; alert = {"warnings": [], "level": 0, "time": ""}
     for url, name in [
         ("https://www.city.asahikawa.hokkaido.jp/700/news.xml", "旭川市"),
         ("https://www.atca.jp/feed/", "旭川観光協会"),
     ]:
         try:
-            all_items += parse_rss(fetch(url), name)
-            print(f"[OK] {name}", file=sys.stderr)
+            all_items += parse_rss(fetch(url), name); print(f"[OK] {name}", file=sys.stderr)
         except Exception as e:
             print(f"[NG] {name}: {e}", file=sys.stderr)
     for url in [
@@ -94,15 +111,19 @@ def main():
         "https://www.data.jma.go.jp/developer/xml/feed/extra.xml",
     ]:
         try:
-            all_items += parse_jma(fetch(url))
+            its, al = parse_jma(fetch(url))
+            all_items += its
+            if al["level"] > alert["level"]: alert = al
             print(f"[OK] 気象庁 {url.split('/')[-1]}", file=sys.stderr)
         except Exception as e:
             print(f"[NG] 気象庁 {url}: {e}", file=sys.stderr)
     all_items.sort(key=lambda x: x["date"] or "", reverse=True)
-    out = {"updated": to_iso(datetime.datetime.now(datetime.timezone.utc)), "items": all_items}
+    out = {"updated": to_iso(datetime.datetime.now(datetime.timezone.utc)),
+           "items": all_items, "alert": alert}
     with open("docs/news.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
-    print(f"[DONE] docs/news.json に {len(all_items)} 件を保存しました")
+    lv = alert["level"]
+    print(f"[DONE] {len(all_items)}件保存。警報: レベル{lv} {alert['warnings'] if lv else '(なし)'}")
 
 if __name__ == "__main__":
     main()
