@@ -1,197 +1,229 @@
 {
-  "updated": "2026-07-12T13:32:21.081629+09:00",
+  "updated": "2026-07-12T14:33:16.955905+09:00",
   "items": [
     {
       "title": "上川・留萌地方気象警報・注意報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712042412_0_VPWW54_012000.xml",
-      "date": "2026-07-12T13:24:11+09:00",
-      "source": "気象庁"
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712053113_0_VPWW54_012000.xml",
+      "date": "2026-07-12T14:31:12+09:00",
+      "source": "気象庁",
+      "body": "上川地方では、低い土地の浸水に警戒してください。"
     },
     {
       "title": "上川・留萌地方大雨警報・注意報",
-      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712042408_0_VPWW55_012000.xml",
-      "date": "2026-07-12T13:24:07+09:00",
-      "source": "気象庁"
+      "link": "https://www.data.jma.go.jp/developer/xml/data/20260712053039_0_VPWW55_012000.xml",
+      "date": "2026-07-12T14:30:39+09:00",
+      "source": "気象庁",
+      "body": "上川地方では、低い土地の浸水や河川の増水に警戒してください。"
     },
     {
       "title": "上川・留萌地方警戒・注意事項時系列情報",
       "link": "https://www.data.jma.go.jp/developer/xml/data/20260712015515_0_VPWP50_012000.xml",
       "date": "2026-07-12T10:55:00+09:00",
-      "source": "気象庁"
+      "source": "気象庁",
+      "body": ""
     },
     {
       "title": "上川・留萌地方府県週間天気予報",
       "link": "https://www.data.jma.go.jp/developer/xml/data/20260712014927_0_VPFW50_012000.xml",
       "date": "2026-07-12T10:49:26+09:00",
-      "source": "気象庁"
+      "source": "気象庁",
+      "body": ""
     },
     {
       "title": "上川・留萌地方土砂災害警報・注意報",
       "link": "https://www.data.jma.go.jp/developer/xml/data/20260712014310_0_VPWW56_012000.xml",
       "date": "2026-07-12T10:43:09+09:00",
-      "source": "気象庁"
+      "source": "気象庁",
+      "body": "上川地方、留萌地方では、土砂災害に注意してください。"
     },
     {
       "title": "上川・留萌地方府県天気予報",
       "link": "https://www.data.jma.go.jp/developer/xml/data/20260712013534_0_VPFD51_012000.xml",
       "date": "2026-07-12T10:35:34+09:00",
-      "source": "気象庁"
+      "source": "気象庁",
+      "body": ""
     },
     {
       "title": "上川・留萌地方雷・濃霧注意報",
       "link": "https://www.data.jma.go.jp/developer/xml/data/20260712003248_0_VPWW61_012000.xml",
       "date": "2026-07-12T09:32:48+09:00",
-      "source": "気象庁"
+      "source": "気象庁",
+      "body": "上川、留萌地方では、急な強い雨や落雷に注意してください。留萌地方では、濃霧による視程障害に注意してください。"
     },
     {
       "title": "報道依頼文書の公開（令和8年7月発表分）",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/723/729/d084351.html",
       "date": "2026-07-11T10:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "旭川市の世帯・人口",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/701/705/d055301.html",
       "date": "2026-07-09T15:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "統計で見る旭川",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/701/705/p007300d.html",
       "date": "2026-07-09T15:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "こうほう旭川市民と旭川市ホームページへの広告掲載",
       "link": "https://www.city.asahikawa.hokkaido.jp/500/565/589/d075767.html",
       "date": "2026-07-08T09:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "まちづくりタウンミーティング「あさごえ」",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/723/730/d084296.html",
       "date": "2026-07-06T16:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "インバウンド向け飲食店マップに関するアンケートを行っています（飲食店会員向け）",
       "link": "https://www.atca.jp/%e3%82%a4%e3%83%b3%e3%83%90%e3%82%a6%e3%83%b3%e3%83%89%e5%90%91%e3%81%91%e9%a3%b2%e9%a3%9f%e5%ba%97%e3%83%9e%e3%83%83%e3%83%97%e3%81%ab%e9%96%a2%e3%81%99%e3%82%8b%e3%82%a2%e3%83%b3%e3%82%b1%e3%83%bc/",
       "date": "2026-07-06T11:23:03+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "こうほう旭川市民「あさひばし」最新号",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/723/724/d071770.html",
       "date": "2026-07-06T09:30:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "地方創生臨時交付金を活用した事業の実施状況、効果検証及び実施計画",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/731/734/d080604.html",
       "date": "2026-07-01T12:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "報道依頼文書の公開（令和8年6月発表分）",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/723/729/d084150.html",
       "date": "2026-07-01T10:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "使用料・手数料の見直し（令和8年度の取組）",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/731/734/d069191.html",
       "date": "2026-07-01T08:50:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "総合庁舎にカームダウン・クールダウンスペースを設置しました",
       "link": "https://www.city.asahikawa.hokkaido.jp/10013/10014/d084163.html",
       "date": "2026-07-01T00:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "職員の懲戒処分について",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/762/765/p053929.html",
       "date": "2026-06-30T18:30:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "旭川市議会議案（市長提出分）",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/731/735/d067936.html",
       "date": "2026-06-30T10:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "宝くじについて",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/731/734/d077859.html",
       "date": "2026-06-30T00:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "女性デジタルクリエイターへの道！Canvaを使った収入獲得応援セミナー",
       "link": "https://www.city.asahikawa.hokkaido.jp/kurashi/408/600/d084289.html",
       "date": "2026-06-29T00:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "旭川市民ニュース 令和8年度放送分",
       "link": "https://www.city.asahikawa.hokkaido.jp/700/723/725/d083860.html",
       "date": "2026-06-26T12:00:00+09:00",
-      "source": "旭川市"
+      "source": "旭川市",
+      "body": ""
     },
     {
       "title": "川辺で食事や音楽を楽しむかわまちフェスが開催されます！（令和８年７月４日）",
       "link": "https://www.atca.jp/%e5%b7%9d%e8%be%ba%e3%81%a7%e9%a3%9f%e4%ba%8b%e3%82%84%e9%9f%b3%e6%a5%bd%e3%82%92%e6%a5%bd%e3%81%97%e3%82%80%e3%81%8b%e3%82%8f%e3%81%be%e3%81%a1%e3%83%95%e3%82%a7%e3%82%b9%e3%81%8c%e9%96%8b%e5%82%ac/",
       "date": "2026-06-24T15:49:39+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "旭タクシーが新サービス「サイクリストシャトルタクシー」を始めました！",
       "link": "https://www.atca.jp/%e6%97%ad%e3%82%bf%e3%82%af%e3%82%b7%e3%83%bc%e3%81%8c%e6%96%b0%e3%82%b5%e3%83%bc%e3%83%93%e3%82%b9%e3%80%8c%e3%82%b5%e3%82%a4%e3%82%af%e3%83%aa%e3%82%b9%e3%83%88%e3%82%b7%e3%83%a3%e3%83%88%e3%83%ab/",
       "date": "2026-06-24T09:42:45+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "令和８年度下期イベント・コンベンションの調査について",
       "link": "https://www.atca.jp/%e4%bb%a4%e5%92%8c%ef%bc%98%e5%b9%b4%e5%ba%a6%e4%b8%8b%e6%9c%9f%e3%82%a4%e3%83%99%e3%83%b3%e3%83%88%e3%83%bb%e3%82%b3%e3%83%b3%e3%83%99%e3%83%b3%e3%82%b7%e3%83%a7%e3%83%b3%e3%81%ae%e8%aa%bf%e6%9f%bb/",
       "date": "2026-06-05T15:15:10+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "旭川ミュージックウィーク2026のタイムテーブルが決定しました！",
       "link": "https://www.atca.jp/%e6%97%ad%e5%b7%9d%e3%83%9f%e3%83%a5%e3%83%bc%e3%82%b8%e3%83%83%e3%82%af%e3%82%a6%e3%82%a3%e3%83%bc%e3%82%af2026%e3%81%ae%e3%82%bf%e3%82%a4%e3%83%a0%e3%83%86%e3%83%bc%e3%83%96%e3%83%ab%e3%81%8c/",
       "date": "2026-05-29T15:41:21+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "第94回北海道音楽大行進の行進順・アフターコンサートの出演順が決定しました！",
       "link": "https://www.atca.jp/%e7%ac%ac94%e5%9b%9e%e5%8c%97%e6%b5%b7%e9%81%93%e9%9f%b3%e6%a5%bd%e5%a4%a7%e8%a1%8c%e9%80%b2%e3%81%ae%e8%a1%8c%e9%80%b2%e9%a0%86%e3%83%bb%e3%82%a2%e3%83%95%e3%82%bf%e3%83%bc%e3%82%b3%e3%83%b3%e3%82%b5/",
       "date": "2026-05-29T15:38:34+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "旭山動物園は4月29日・30日、臨時休業となります。",
       "link": "https://www.atca.jp/%e6%97%ad%e5%b1%b1%e5%8b%95%e7%89%a9%e5%9c%92%e3%81%af4%e6%9c%8829%e6%97%a5%e3%83%bb30%e6%97%a5%e3%80%81%e8%87%a8%e6%99%82%e4%bc%91%e6%a5%ad%e3%81%a8%e3%81%aa%e3%82%8a%e3%81%be%e3%81%99%e3%80%82/",
       "date": "2026-04-27T16:27:15+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "4月29日（水）より旭山動物園の夏期営業が始まります！",
       "link": "https://www.atca.jp/4%e6%9c%8828%e6%97%a5%ef%bc%88%e7%81%ab%ef%bc%89%e3%82%88%e3%82%8a%e6%97%ad%e5%b1%b1%e5%8b%95%e7%89%a9%e5%9c%92%e3%81%ae%e5%a4%8f%e6%9c%9f%e5%96%b6%e6%a5%ad%e3%81%8c%e5%a7%8b%e3%81%be%e3%82%8a/",
       "date": "2026-04-23T13:50:41+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "旭川ミュージックウィーク2026の申込みが開始されました！",
       "link": "https://www.atca.jp/%e6%97%ad%e5%b7%9d%e3%83%9f%e3%83%a5%e3%83%bc%e3%82%b8%e3%83%83%e3%82%af%e3%82%a6%e3%82%a3%e3%83%bc%e3%82%af2026%e3%81%ae%e7%94%b3%e8%be%bc%e3%81%bf%e3%81%8c%e9%96%8b%e5%a7%8b%e3%81%95%e3%82%8c/",
       "date": "2026-04-17T09:11:25+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     },
     {
       "title": "第94回北海道音楽大行進の申し込みが開始されました！",
       "link": "https://www.atca.jp/%e7%ac%ac94%e5%9b%9e%e5%8c%97%e6%b5%b7%e9%81%93%e9%9f%b3%e6%a5%bd%e5%a4%a7%e8%a1%8c%e9%80%b2%e3%81%ae%e7%94%b3%e3%81%97%e8%be%bc%e3%81%bf%e3%81%8c%e9%96%8b%e5%a7%8b%e3%81%95%e3%82%8c%e3%81%be%e3%81%97/",
       "date": "2026-04-14T15:58:20+09:00",
-      "source": "旭川観光協会"
+      "source": "旭川観光協会",
+      "body": ""
     }
   ]
 }
