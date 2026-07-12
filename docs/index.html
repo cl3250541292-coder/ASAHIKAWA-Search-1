@@ -154,6 +154,28 @@
   .nbadge.jma { background: #d93025; }
   #news .nupdated { font-size: 0.75rem; color: #9aa0a6; margin-bottom: 12px; }
   #news .nempty { color: #5f6368; padding: 20px 4px; }
+  /* 気象庁 出典モーダル */
+  #jmaModal { display: none; position: fixed; inset: 0; z-index: 1000;
+          background: rgba(32,33,36,0.55); align-items: center; justify-content: center;
+          padding: 20px; }
+  #jmaModal.open { display: flex; }
+  #jmaModal .box { background: #fff; border-radius: 8px; max-width: 460px; width: 100%;
+          box-shadow: 0 8px 28px rgba(0,0,0,0.18); overflow: hidden; }
+  #jmaModal .head { padding: 20px 24px 12px; border-bottom: 1px solid #ececec; }
+  #jmaModal .head h3 { margin: 0; font-size: 1.05rem; color: #202124; font-weight: 600; }
+  #jmaModal .head .src { margin-top: 4px; font-size: 0.78rem; color: #9aa0a6; }
+  #jmaModal .body { padding: 18px 24px; font-size: 0.9rem; line-height: 1.7; color: #3c4043; }
+  #jmaModal .body .subj { font-weight: 600; color: #202124; margin-bottom: 8px; }
+  #jmaModal .actions { padding: 8px 24px 22px; display: flex; flex-direction: column; gap: 10px; }
+  #jmaModal .btn { display: block; width: 100%; text-align: center; padding: 11px 16px;
+          border-radius: 6px; font-size: 0.9rem; cursor: pointer; text-decoration: none;
+          box-sizing: border-box; border: 1px solid transparent; }
+  #jmaModal .btn-primary { background: #1a73e8; color: #fff; }
+  #jmaModal .btn-primary:hover { background: #1765cc; }
+  #jmaModal .btn-outline { background: #fff; color: #1a73e8; border-color: #dadce0; }
+  #jmaModal .btn-outline:hover { background: #f8f9fa; }
+  #jmaModal .btn-text { background: none; color: #5f6368; padding: 6px; }
+  #jmaModal .btn-text:hover { color: #202124; }
   /* 設定(歯車・型だけ) */
   #gearbtn { display: none; border: none; background: none; cursor: pointer;
           color: #5f6368; padding: 6px; flex-shrink: 0; }
@@ -209,6 +231,23 @@
   <div id="count"></div>
   <div id="results"></div>
   <div id="news"></div>
+  <div id="jmaModal" role="dialog" aria-modal="true" aria-labelledby="jmaTitle">
+    <div class="box">
+      <div class="head">
+        <h3 id="jmaTitle">気象庁 防災情報</h3>
+        <div class="src">出典：気象庁</div>
+      </div>
+      <div class="body">
+        <div class="subj" id="jmaSubj"></div>
+        <p>この情報は、気象庁が発表する防災情報XMLに基づいています。最新かつ詳細な内容は、気象庁の公式ページでご確認ください。</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" id="jmaOfficial" href="#" target="_blank" rel="noopener">気象庁で詳しく見る（上川地方）</a>
+        <a class="btn btn-outline" id="jmaRaw" href="#" target="_blank" rel="noopener">元データ（XML）を表示</a>
+        <button class="btn btn-text" id="jmaClose" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
 
   <div id="popular" class="hidden">
     <p>よく調べられているワード</p>
@@ -636,6 +675,8 @@ document.querySelectorAll('.chip').forEach(chip => {
 // タブ(型だけ):クリックで見た目のアクティブ切替のみ
 // ニュースタブ + 表示切替
 const BADGE = { '旭川市':'city', '旭川観光協会':'kanko', '気象庁':'jma' };
+const JMA_WARN = 'https://www.jma.go.jp/bosai/warning/#area_type=offices&area_code=012000';
+const JMA_FCST = 'https://www.jma.go.jp/bosai/forecast/#area_type=offices&area_code=012000';
 let newsLoaded = false;
 function fmtDate(iso){
   if(!iso) return '';
@@ -657,10 +698,18 @@ async function loadNews(){
     } else {
       for(const it of data.items){
         const cls = BADGE[it.source] || 'city';
-        html += '<a class="nitem" href="' + it.link + '" target="_blank" rel="noopener">'
-             + '<div class="ntitle">' + it.title + '</div>'
-             + '<div class="nmeta"><span class="nbadge ' + cls + '">' + it.source + '</span>'
-             + fmtDate(it.date) + '</div></a>';
+        const meta = '<div class="nmeta"><span class="nbadge ' + cls + '">' + it.source
+             + '</span>' + fmtDate(it.date) + '</div>';
+        if(it.source === '気象庁'){
+          const isFcst = it.title.indexOf('予報') !== -1;
+          html += '<a class="nitem" href="#" data-jma="1" data-title="'
+               + it.title.replace(/"/g,'&quot;') + '" data-raw="' + it.link
+               + '" data-fcst="' + (isFcst ? '1' : '0') + '">'
+               + '<div class="ntitle">' + it.title + '</div>' + meta + '</a>';
+        } else {
+          html += '<a class="nitem" href="' + it.link + '" target="_blank" rel="noopener">'
+               + '<div class="ntitle">' + it.title + '</div>' + meta + '</a>';
+        }
       }
     }
     box.innerHTML = html;
@@ -682,6 +731,28 @@ document.querySelectorAll('#tabs .tab').forEach(t => {
     }
   });
 });
+
+// 気象庁モーダル制御
+const jmaModal = document.getElementById('jmaModal');
+const jmaSubj = document.getElementById('jmaSubj');
+const jmaOfficial = document.getElementById('jmaOfficial');
+const jmaRaw = document.getElementById('jmaRaw');
+function openJma(title, raw, isFcst){
+  jmaSubj.textContent = title;
+  jmaOfficial.href = isFcst ? JMA_FCST : JMA_WARN;
+  jmaRaw.href = raw;
+  jmaModal.classList.add('open');
+}
+function closeJma(){ jmaModal.classList.remove('open'); }
+document.getElementById('news').addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-jma="1"]');
+  if(!a) return;
+  e.preventDefault();
+  openJma(a.getAttribute('data-title'), a.getAttribute('data-raw'), a.getAttribute('data-fcst') === '1');
+});
+document.getElementById('jmaClose').addEventListener('click', closeJma);
+jmaModal.addEventListener('click', (e) => { if(e.target === jmaModal) closeJma(); });
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeJma(); });
 </script>
 </body>
 </html>
