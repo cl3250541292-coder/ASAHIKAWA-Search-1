@@ -621,41 +621,51 @@ async function renderDdgWeb(term) {
     <div><div class="ddgtitle">ウェブ全体からの検索</div>
     <a class="ddgbtn" href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoで「${term}」を検索</a></div>
   </div>`;
-  try {
-    const target = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(term) + '&kl=jp-jp';
-    const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(target));
-    if (!res.ok) throw new Error('proxy ' + res.status);
-    const text = await res.text();
-    const doc = new DOMParser().parseFromString(text, 'text/html');
-    const items = [];
-    doc.querySelectorAll('.result').forEach(el => {
-      const a = el.querySelector('a.result__a');
-      if (!a) return;
-      let href = a.getAttribute('href') || '';
-      const m = href.match(/uddg=([^&]+)/);
-      if (m) { try { href = decodeURIComponent(m[1]); } catch(e) {} }
-      if (!/^https?:/.test(href)) return;
-      const sn = el.querySelector('.result__snippet');
-      items.push({ t: a.textContent.trim(), u: href, s: sn ? sn.textContent.trim() : '' });
-    });
-    if (!items.length) { box.innerHTML = fallback; return; }
-    let out = '<h2>ウェブ検索結果 <span>・ DuckDuckGo より</span></h2>';
-    for (const it of items.slice(0, 8)) {
-      let dom = ''; try { dom = new URL(it.u).hostname; } catch(e) {}
-      out += `<div class="result">
-        <div class="site">
-          <img src="https://www.google.com/s2/favicons?domain=${dom}&sz=64" alt="">
-          <div><div class="sitename">${dom}</div></div>
-        </div>
-        <a class="rtitle" href="${it.u}" target="_blank" rel="noopener">${it.t}</a>
-        <p class="excerpt">${it.s}</p>
-      </div>`;
-    }
-    out += `<p style="margin:12px 0;"><a href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoでもっと見る</a></p>`;
-    box.innerHTML = out;
-  } catch(e) {
-    box.innerHTML = fallback;
+  const target = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(term) + '&kl=jp-jp';
+  const proxies = [
+    u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  ];
+  for (const wrap of proxies) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 6000);
+      const res = await fetch(wrap(target), { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const text = await res.text();
+      const doc = new DOMParser().parseFromString(text, 'text/html');
+      const items = [];
+      doc.querySelectorAll('.result').forEach(el => {
+        const a = el.querySelector('a.result__a');
+        if (!a) return;
+        let href = a.getAttribute('href') || '';
+        const m = href.match(/uddg=([^&]+)/);
+        if (m) { try { href = decodeURIComponent(m[1]); } catch(e) {} }
+        if (!/^https?:/.test(href)) return;
+        const sn = el.querySelector('.result__snippet');
+        items.push({ t: a.textContent.trim(), u: href, s: sn ? sn.textContent.trim() : '' });
+      });
+      if (!items.length) continue;
+      let out = '<h2>ウェブ検索結果 <span>・ DuckDuckGo より</span></h2>';
+      for (const it of items.slice(0, 8)) {
+        let dom = ''; try { dom = new URL(it.u).hostname; } catch(e) {}
+        out += `<div class="result">
+          <div class="site">
+            <img src="https://www.google.com/s2/favicons?domain=${dom}&sz=64" alt="">
+            <div><div class="sitename">${dom}</div></div>
+          </div>
+          <a class="rtitle" href="${it.u}" target="_blank" rel="noopener">${it.t}</a>
+          <p class="excerpt">${it.s}</p>
+        </div>`;
+      }
+      out += `<p style="margin:12px 0;"><a href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoでもっと見る</a></p>`;
+      box.innerHTML = out;
+      return;
+    } catch(e) { /* 次の中継へ */ }
   }
+  box.innerHTML = fallback;
 }
 
 async function render() {
