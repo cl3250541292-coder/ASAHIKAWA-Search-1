@@ -815,20 +815,14 @@ async function loadVideos(){
       const res = await fetch('videos.json?_=' + Date.now());
       videoData = await res.json();
     }
+    let items = (videoData.items || []).filter(it => it.city === cityMode);
     const term = q.value.trim();
-    let items, heading;
-    if(term.includes('ニュース')){
-      items = (videoData.items || []).filter(it => it.city === 'news');
-      heading = '北海道のニュース動画';
-    } else {
-      items = (videoData.items || []).filter(it => it.city === cityMode);
-      if(term){
-        const hit = items.filter(it => it.title.includes(term) || it.channel.includes(term));
-        if(hit.length) items = hit;
-      }
-      heading = CITY[cityMode].name + 'の動画';
+    if(term){
+      const hit = items.filter(it => it.title.includes(term) || it.channel.includes(term));
+      if(hit.length) items = hit;
     }
-    let html = '<h2>' + heading + '</h2>';
+    const cname = CITY[cityMode].name;
+    let html = '<h2>' + cname + 'の動画</h2>';
     if(!items.length){
       html += '<div class="nempty">動画が見つかりませんでした。</div>';
     } else {

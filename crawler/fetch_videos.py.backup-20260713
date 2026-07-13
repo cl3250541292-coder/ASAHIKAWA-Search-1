@@ -35,34 +35,6 @@ for ch in channels:
     except Exception as ex:
         print(f"[error] {ch['name']} : {ex}")
 
-# 手動追加分(crawler/extra_videos.json)
-try:
-    with open("crawler/extra_videos.json", encoding="utf-8") as f:
-        extras = json.load(f)
-    for ex in extras:
-        m = re.search(r"(?:v=|youtu\.be/|shorts/)([\w-]{11})", ex.get("url", ""))
-        if not m:
-            print(f"[extra skip] URL不明: {ex}")
-            continue
-        vid = m.group(1)
-        if any(it["id"] == vid for it in items):
-            continue
-        try:
-            oe = requests.get("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v="
-                              + vid + "&format=json", headers=UA, timeout=15).json()
-            items.append({
-                "id": vid,
-                "title": ex.get("title") or oe.get("title", ""),
-                "date": ex.get("date", ""),
-                "channel": ex.get("channel") or oe.get("author_name", ""),
-                "city": ex.get("city", "asahikawa"),
-            })
-            print(f"[extra OK] {oe.get('title','')[:30]}")
-        except Exception as e2:
-            print(f"[extra error] {vid} : {e2}")
-except FileNotFoundError:
-    pass
-
 items.sort(key=lambda x: x["date"], reverse=True)
 out = {"updated": datetime.now(timezone.utc).isoformat(), "items": items}
 with open("docs/videos.json", "w", encoding="utf-8") as f:
