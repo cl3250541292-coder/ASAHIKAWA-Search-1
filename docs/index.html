@@ -585,7 +585,18 @@ async function doSearch(term) {
     const sb = scored.indexOf(b) - (b.depth <= 1 ? 50 : b.depth <= 2 ? 10 : 0);
     return sa - sb;
   });
-  results = scored.map(s => s.r);
+  // 同じページ(URL)の重複を除去(末尾スラッシュやindex.htmlの違いも同一視)
+  const seenUrls = new Set();
+  const deduped = [];
+  for (const s of scored) {
+    let key = ((s.d.meta && s.d.meta.url) || s.d.url || '')
+      .replace(/\/(index\.html?)?$/, '');
+    try { key = decodeURI(key); } catch(e) {}
+    if (seenUrls.has(key)) continue;
+    seenUrls.add(key);
+    deduped.push(s);
+  }
+  results = deduped.map(s => s.r);
   page = 1;
   loaded = PER_PAGE;
   render();
@@ -609,8 +620,11 @@ async function render() {
     try {
       const u = new URL(url);
       domain = u.hostname;
-      const parts = u.pathname.split('/').filter(Boolean);
+      const parts = u.pathname.split('/').filter(Boolean).map(p => {
+        try { return decodeURIComponent(p); } catch(e) { return p; }
+      });
       dispUrl = 'https://' + domain + (parts.length ? ' \u203a ' + parts.join(' \u203a ') : '');
+      if (dispUrl.length > 80) dispUrl = dispUrl.slice(0, 80) + '…';
     } catch(e) {}
     const names = {
       'www.city.asahikawa.hokkaido.jp': '旭川市',
