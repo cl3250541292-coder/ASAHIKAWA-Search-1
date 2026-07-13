@@ -113,6 +113,16 @@
           display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
           overflow: hidden; }
   .excerpt mark { background: #ff0; }
+  .ddgcard { display: flex; align-items: center; gap: 14px; border: 1px solid #ddd;
+          border-radius: 12px; padding: 16px; margin: 20px 0; }
+  .ddgcard img { width: 34px; height: 34px; }
+  .ddgcard .ddgtitle { font-weight: bold; margin-bottom: 8px; }
+  .ddgcard a { color: #1a0dab; }
+  .ddgbtn { display: inline-block; border: 1px solid #dadce0; border-radius: 20px;
+          padding: 8px 18px; text-decoration: none; }
+  .ddgbtn:hover { background: #f8f9fa; }
+  #ddgweb h2 { font-size: 1.05rem; color: #202124; }
+  #ddgweb h2 span { font-weight: normal; color: #5f6368; font-size: 0.8rem; }
 
   #pager { display: flex; justify-content: center; align-items: center;
           gap: 14px; margin: 20px 0 28px; flex-wrap: wrap; }
@@ -602,6 +612,52 @@ async function doSearch(term) {
   render();
 }
 
+async function renderDdgWeb(term) {
+  const box = document.getElementById('ddgweb');
+  if (!box) return;
+  const ddgUrl = 'https://duckduckgo.com/?q=' + encodeURIComponent(term);
+  const fallback = `<div class="ddgcard">
+    <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64" alt="">
+    <div><div class="ddgtitle">ウェブ全体からの検索</div>
+    <a class="ddgbtn" href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoで「${term}」を検索</a></div>
+  </div>`;
+  try {
+    const target = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(term) + '&kl=jp-jp';
+    const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(target));
+    if (!res.ok) throw new Error('proxy ' + res.status);
+    const text = await res.text();
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const items = [];
+    doc.querySelectorAll('.result').forEach(el => {
+      const a = el.querySelector('a.result__a');
+      if (!a) return;
+      let href = a.getAttribute('href') || '';
+      const m = href.match(/uddg=([^&]+)/);
+      if (m) { try { href = decodeURIComponent(m[1]); } catch(e) {} }
+      if (!/^https?:/.test(href)) return;
+      const sn = el.querySelector('.result__snippet');
+      items.push({ t: a.textContent.trim(), u: href, s: sn ? sn.textContent.trim() : '' });
+    });
+    if (!items.length) { box.innerHTML = fallback; return; }
+    let out = '<h2>ウェブ検索結果 <span>・ DuckDuckGo より</span></h2>';
+    for (const it of items.slice(0, 8)) {
+      let dom = ''; try { dom = new URL(it.u).hostname; } catch(e) {}
+      out += `<div class="result">
+        <div class="site">
+          <img src="https://www.google.com/s2/favicons?domain=${dom}&sz=64" alt="">
+          <div><div class="sitename">${dom}</div></div>
+        </div>
+        <a class="rtitle" href="${it.u}" target="_blank" rel="noopener">${it.t}</a>
+        <p class="excerpt">${it.s}</p>
+      </div>`;
+    }
+    out += `<p style="margin:12px 0;"><a href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoでもっと見る</a></p>`;
+    box.innerHTML = out;
+  } catch(e) {
+    box.innerHTML = fallback;
+  }
+}
+
 async function render() {
   const total = results.length;
   countEl.textContent = total
@@ -613,7 +669,14 @@ async function render() {
   else { start = (page - 1) * PER_PAGE; end = Math.min(total, start + PER_PAGE); }
 
   const datas = await Promise.all(results.slice(start, end).map(r => r.data()));
-  resultsEl.innerHTML = topLinkHtml + datas.map(d => {
+  // DuckDuckGoウェブ結果(0件時、または1〜2文字の短い検索語のとき)
+  let ddgTop = '';
+  const ddgShort = lastTerm.replace(/\s|\u3000/g, '').length <= 2;
+  if (total === 0 || ddgShort) {
+    ddgTop = '<div id="ddgweb"><div class="ddgcard">DuckDuckGoのウェブ結果を読み込み中…</div></div>';
+    setTimeout(() => renderDdgWeb(lastTerm), 0);
+  }
+  resultsEl.innerHTML = ddgTop + topLinkHtml + datas.map(d => {
     const url = (d.meta && d.meta.url) || d.url;
     const title = (d.meta && d.meta.title) || url;
     let domain = '', dispUrl = url;
