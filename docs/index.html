@@ -144,6 +144,24 @@
   body.weather-mode #popular, body.weather-mode #pager, body.weather-mode #kcard { display: none !important; }
   body.news-mode #count, body.news-mode #results,
   body.news-mode #popular, body.news-mode #pager, body.news-mode #kcard { display: none !important; }
+  /* 動画パネル */
+  #videos { display: none; padding: 8px 0 40px; max-width: 720px; }
+  body.video-mode #videos { display: block; }
+  body.video-mode #count, body.video-mode #results,
+  body.video-mode #popular, body.video-mode #pager, body.video-mode #kcard { display: none !important; }
+  #videos h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
+  .vitem { display: flex; gap: 16px; padding: 14px 4px; border-bottom: 1px solid #eee;
+          text-decoration: none; color: inherit; }
+  .vitem:hover { background: #f8f9fa; }
+  .vthumb { width: 200px; min-width: 200px; aspect-ratio: 16/9; border-radius: 8px;
+          object-fit: cover; background: #eee; }
+  .vtitle { color: #1a0dab; font-size: 1.05rem; line-height: 1.4; margin: 0 0 6px; }
+  .vitem:hover .vtitle { text-decoration: underline; }
+  .vmeta { color: #5f6368; font-size: 0.85rem; }
+  @media (max-width: 768px) {
+    .vthumb { width: 140px; min-width: 140px; }
+    .vtitle { font-size: 0.95rem; }
+  }
   #news h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
   #news .nitem { display: block; padding: 14px 4px; border-bottom: 1px solid #eee;
           text-decoration: none; color: inherit; }
@@ -268,6 +286,7 @@
   <div id="count"></div>
   <div id="results"></div>
   <div id="news"></div>
+  <div id="videos"></div>
   <div id="weather"></div>
   <div id="jmaModal" role="dialog" aria-modal="true" aria-labelledby="jmaTitle">
     <div class="box">
@@ -787,13 +806,49 @@ async function loadWeather(){
     box.innerHTML = '<div class="nempty">情報を読み込めませんでした。</div>';
   }
 }
+let videoData = null;
+async function loadVideos(){
+  const box = document.getElementById('videos');
+  box.innerHTML = '<div class="nempty">読み込み中…</div>';
+  try{
+    if(!videoData){
+      const res = await fetch('videos.json?_=' + Date.now());
+      videoData = await res.json();
+    }
+    let items = (videoData.items || []).filter(it => it.city === cityMode);
+    const term = q.value.trim();
+    if(term){
+      const hit = items.filter(it => it.title.includes(term) || it.channel.includes(term));
+      if(hit.length) items = hit;
+    }
+    const cname = CITY[cityMode].name;
+    let html = '<h2>' + cname + 'の動画</h2>';
+    if(!items.length){
+      html += '<div class="nempty">動画が見つかりませんでした。</div>';
+    } else {
+      for(const it of items){
+        html += '<a class="vitem" href="https://www.youtube.com/watch?v=' + it.id
+             + '" target="_blank" rel="noopener">'
+             + '<img class="vthumb" src="https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg" alt="" loading="lazy">'
+             + '<div><div class="vtitle">' + it.title + '</div>'
+             + '<div class="vmeta">YouTube ・ ' + it.channel + ' ・ ' + fmtDate(it.date) + '</div></div></a>';
+      }
+    }
+    box.innerHTML = html;
+  }catch(e){
+    box.innerHTML = '<div class="nempty">動画を読み込めませんでした。</div>';
+  }
+}
 document.querySelectorAll('#tabs .tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('#tabs .tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     const label = t.textContent.trim();
-    document.body.classList.remove('news-mode', 'weather-mode');
-    if(label === 'ニュース'){
+    document.body.classList.remove('news-mode', 'weather-mode', 'video-mode');
+    if(label === '動画'){
+      document.body.classList.add('video-mode');
+      loadVideos();
+    } else if(label === 'ニュース'){
       document.body.classList.add('news-mode');
       loadNews();
     } else if(label === '気象情報'){
