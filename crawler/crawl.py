@@ -22,7 +22,7 @@ PROFILES = {
             "https://www.atca.jp/",
         ],
         "domains": {"www.city.asahikawa.hokkaido.jp", "www.atca.jp"},
-        "max_pages": 300,
+        "max_pages": 2000,
         "out_dir": "docs/corpus",
     },
     "fukagawa": {
