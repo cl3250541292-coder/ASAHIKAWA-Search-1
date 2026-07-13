@@ -677,7 +677,12 @@ q.addEventListener('keydown', (e) => {
   const term = q.value.trim();
   if (!term) { setMode(false); return; }
   setMode(true);
-  doSearch(term);
+  if (document.body.classList.contains('video-mode')) {
+    lastTerm = term;
+    loadVideos();      // 動画タブ中は動画の絞り込みを更新
+  } else {
+    doSearch(term);    // 通常の検索
+  }
   scrollTo(0, 0);
 });
 
@@ -851,6 +856,10 @@ document.querySelectorAll('#tabs .tab').forEach(t => {
     t.classList.add('active');
     const label = t.textContent.trim();
     document.body.classList.remove('news-mode', 'weather-mode', 'video-mode');
+    if(label === 'すべて'){
+      const term = q.value.trim();
+      if(term) doSearch(term);
+    }
     if(label === '動画'){
       document.body.classList.add('video-mode');
       loadVideos();
