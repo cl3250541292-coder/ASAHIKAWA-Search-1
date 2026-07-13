@@ -656,10 +656,17 @@ async function render() {
 }
 
 function setMode(searching) {
-  document.body.className = searching ? 'search-mode' : 'home-mode';
+  document.body.classList.toggle('search-mode', searching);
+  document.body.classList.toggle('home-mode', !searching);
   home.classList.toggle('hidden', searching);
   popular.classList.toggle('hidden', !searching);
-  if (!searching) { countEl.textContent = ''; resultsEl.innerHTML = ''; pagerEl.innerHTML = ''; kcardEl.innerHTML = ''; topLinkHtml = ''; }
+  if (!searching) {
+    countEl.textContent = ''; resultsEl.innerHTML = ''; pagerEl.innerHTML = ''; kcardEl.innerHTML = ''; topLinkHtml = '';
+    document.body.classList.remove('news-mode', 'weather-mode', 'video-mode');
+    const tabs = document.querySelectorAll('#tabs .tab');
+    tabs.forEach(x => x.classList.remove('active'));
+    if (tabs[0]) tabs[0].classList.add('active');
+  }
 }
 
 const clearBtn = document.getElementById('clearbtn');
@@ -680,6 +687,9 @@ q.addEventListener('keydown', (e) => {
   if (document.body.classList.contains('video-mode')) {
     lastTerm = term;
     loadVideos();      // 動画タブ中は動画の絞り込みを更新
+  } else if (document.body.classList.contains('news-mode')
+          || document.body.classList.contains('weather-mode')) {
+    // ニュース/気象タブ中は表示を維持(内容は検索語に依存しない)
   } else {
     doSearch(term);    // 通常の検索
   }
