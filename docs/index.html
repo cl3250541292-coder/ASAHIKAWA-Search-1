@@ -115,7 +115,10 @@
   .excerpt { color: #4d5156; font-size: 0.9rem; line-height: 1.6; margin: 0;
           display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
           overflow: hidden; }
-  .excerpt mark { background: #ff0; }
+  .excerpt mark { background: #ff0; }rm -f applyfront2.py
+git add docs/index.html docs/curated.json build_curated.py
+git commit -m "動画キュレーション拡充(エイリアス統合・新キーワード多数)・動画タブ絞り込み改善"
+git push
   .ddgcard { display: flex; align-items: center; gap: 14px; border: 1px solid #ddd;
           border-radius: 12px; padding: 16px; margin: 20px 0; }
   .ddgcard img { width: 34px; height: 34px; }
@@ -163,6 +166,25 @@
   body.video-mode #count, body.video-mode #results,
   body.video-mode #popular, body.video-mode #pager, body.video-mode #kcard { display: none !important; }
   #videos h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
+  /* 論文パネル */
+  #papers { display: none; padding: 8px 0 40px; max-width: 720px; }
+  body.paper-mode #papers { display: block; }
+  body.paper-mode #count, body.paper-mode #results,
+  body.paper-mode #popular, body.paper-mode #pager, body.paper-mode #kcard { display: none !important; }
+  #papers h2 { font-size: 1.1rem; margin: 8px 0 16px; color: #202124; }
+  #papers .nempty { color: #5f6368; padding: 20px 4px; }
+  .pmeta { color: #5f6368; font-size: 0.85rem; margin: 2px 0 0; }
+  .pauth { color: #202124; font-size: 0.9rem; margin: 4px 0 0; }
+  .pjr { color: #1a73e8; font-size: 0.9rem; margin: 4px 0 0; }
+  .pdoi { font-size: 0.85rem; margin: 6px 0 0; }
+  .pbadge { border: 1px solid #cfe3f7; background: #f1f8fe; color: #1a73e8;
+            border-radius: 4px; padding: 1px 6px; font-size: 0.75rem; margin-right: 6px; }
+  .ptags { margin: 8px 0 0; }
+  .ptag { border-radius: 12px; padding: 2px 10px; font-size: 0.75rem; margin-right: 6px; background: #f1f3f4; }
+  .ptag-j { color: #188038; }
+  .ptag-b { color: #5f6368; }
+  .psec { font-size: 0.95rem; color: #202124; margin: 22px 0 4px;
+          border-bottom: 1px solid #eee; padding-bottom: 6px; }
   .vitem { display: flex; gap: 16px; padding: 14px 4px; border-bottom: 1px solid #eee;
           text-decoration: none; color: inherit; }
   .vitem:hover { background: #f8f9fa; }
@@ -293,6 +315,7 @@
   <button class="tab" type="button">地図</button>
   <button class="tab" type="button">ニュース</button>
   <button class="tab" type="button">気象情報</button>
+  <button class="tab" type="button">論文</button>
 </div>
 <main>
   <div id="kcard"></div>
@@ -301,6 +324,7 @@
   <div id="news"></div>
   <div id="videos"></div>
   <div id="weather"></div>
+  <div id="papers"></div>
   <div id="jmaModal" role="dialog" aria-modal="true" aria-labelledby="jmaTitle">
     <div class="box">
       <div class="head">
@@ -732,7 +756,7 @@ function setMode(searching) {
   popular.classList.toggle('hidden', !searching);
   if (!searching) {
     countEl.textContent = ''; resultsEl.innerHTML = ''; pagerEl.innerHTML = ''; kcardEl.innerHTML = ''; topLinkHtml = '';
-    document.body.classList.remove('news-mode', 'weather-mode', 'video-mode');
+    document.body.classList.remove('news-mode', 'weather-mode', 'video-mode', 'paper-mode');
     const tabs = document.querySelectorAll('#tabs .tab');
     tabs.forEach(x => x.classList.remove('active'));
     if (tabs[0]) tabs[0].classList.add('active');
@@ -757,6 +781,9 @@ q.addEventListener('keydown', (e) => {
   if (document.body.classList.contains('video-mode')) {
     lastTerm = term;
     loadVideos();      // 動画タブ中は動画の絞り込みを更新
+  } else if (document.body.classList.contains('paper-mode')) {
+    lastTerm = term;
+    loadPapers();      // 論文タブ中は論文を再検索
   } else if (document.body.classList.contains('news-mode')
           || document.body.classList.contains('weather-mode')) {
     // ニュース/気象タブ中は表示を維持(内容は検索語に依存しない)
@@ -892,6 +919,77 @@ async function loadWeather(){
   }
 }
 let videoData = null;
+function pEsc(x){ return (x||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function loadPapers(){
+  const box = document.getElementById('papers');
+  if(!box) return;
+  const term = q.value.trim();
+  if(!term){ box.innerHTML = '<div class="nempty">検索したい言葉を入力してください。</div>'; return; }
+  box.innerHTML = '<div class="nempty">読み込み中…</div>';
+  try{
+    const url = 'https://cir.nii.ac.jp/opensearch/all?format=json&count=50&q=' + encodeURIComponent(term);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    const items = j.items || [];
+    const total = j['opensearch:totalResults'] || 0;
+    if(!items.length){ box.innerHTML = '<div class="nempty">論文が見つかりませんでした。</div>'; return; }
+
+    const pIds = (it, t) => { let a = it['dc:identifier'] || []; if(!Array.isArray(a)) a = [a];
+      return a.filter(x => x && x['@type'] === t).map(x => x['@value']); };
+
+    function pCard(it){
+      const doi  = pIds(it, 'cir:DOI')[0];
+      const ncid = pIds(it, 'cir:NCID')[0];
+      const jr   = it['prism:publicationName'] || '';
+      const title = it.title || jr || '(無題)';
+      const usedJr = !it.title && jr;
+      let au = it['dc:creator'] || []; if(!Array.isArray(au)) au = [au];
+      au = au.map(a => (typeof a === 'string' ? a : (a && a.name) || '')).filter(Boolean);
+      const date = it['prism:publicationDate'] || '';
+      const year = date ? String(date).slice(0, 4) : '';
+      const vol = it['prism:volume'], sp = it['prism:startingPage'], ep = it['prism:endingPage'];
+      let bib = [];
+      if(year) bib.push(year + '年');
+      if(vol && vol !== '0') bib.push(vol + ' 巻');
+      if(sp && sp !== '-') bib.push(sp + (ep && ep !== '-' ? '-' + ep : ''));
+      const link = doi ? ('https://doi.org/' + doi)
+                 : (ncid ? ('https://ci.nii.ac.jp/ncid/' + ncid) 
+                 : ((it.link && it.link['@id']) || it['@id'] || ''));
+      const tags = [];
+      if(doi) tags.push('<span class="ptag ptag-j">ジャーナル</span>');
+      if((it['dc:type'] || '') === 'Book') tags.push('<span class="ptag ptag-b">図書</span>');
+      let h = '<div class="result">'
+        + '<a class="rtitle" href="' + link + '" target="_blank" rel="noopener">' + pEsc(title) + '</a>';
+      if(au.length) h += '<div class="pauth">' + pEsc(au.slice(0,6).join(', ')) + (au.length > 6 ? ' ほか' : '') + '</div>';
+      if(jr && !usedJr) h += '<div class="pjr">' + pEsc(jr) + '</div>';
+      if(bib.length) h += '<div class="pmeta">' + pEsc(bib.join(' ')) + '</div>';
+      if(date) h += '<div class="pmeta">発行日: ' + pEsc(date) + '</div>';
+      if(doi) h += '<div class="pdoi"><span class="pbadge">DOI</span> <a href="https://doi.org/' + doi + '" target="_blank" rel="noopener">https://doi.org/' + pEsc(doi) + '</a></div>';
+      if(ncid) h += '<div class="pdoi"><span class="pbadge">CiNii Books</span> <a href="https://ci.nii.ac.jp/ncid/' + ncid + '" target="_blank" rel="noopener">所蔵図書館を見る</a></div>';
+      if(tags.length) h += '<div class="ptags">' + tags.join('') + '</div>';
+      return h + '</div>';
+    }
+
+    const web = [], lib = [], other = [];
+    for(const it of items){
+      if(pIds(it, 'cir:DOI')[0]) web.push(it);
+      else if((it['dc:type'] || '') === 'Book' || pIds(it, 'cir:NCID')[0]) lib.push(it);
+      else other.push(it);
+    }
+    let html = '<h2>「' + pEsc(term) + '」の論文 <span style="font-weight:400;color:#5f6368;font-size:0.9rem;">・ CiNii Research より(全' + total + '件)</span></h2>';
+    if(web.length)   html += '<h3 class="psec">Webで読める（DOIあり） ' + web.length + '件</h3>' + web.map(pCard).join('');
+    if(lib.length)   html += '<h3 class="psec">図書館に所蔵 ' + lib.length + '件</h3>' + lib.map(pCard).join('');
+    if(other.length) html += '<h3 class="psec">その他 ' + other.length + '件</h3>' + other.map(pCard).join('');
+    html += '<p style="margin:16px 0;"><a href="https://cir.nii.ac.jp/all?q=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">CiNii Research でもっと見る</a></p>';
+    box.innerHTML = html;
+  }catch(e){
+    box.innerHTML = '<div class="nempty">論文を読み込めませんでした。(' + (e.message || e.name) + ')</div>';
+  }
+}
 let curatedData = null;
 async function loadCurated(){
   if(curatedData) return curatedData;
@@ -944,17 +1042,15 @@ async function loadVideos(){
       items = (videoData.items || []).filter(it => it.city === cityMode);
       if(term){
         const hit = items.filter(it => it.title.includes(term) || it.channel.includes(term));
-        if(hit.length) items = hit;
+        items = hit;
       }
       heading = CITY[cityMode].name + 'の動画';
     }
     let html = '';
     const _ckw = cMatchKey(term);
     if(_ckw){ html += '<h2>おすすめ動画</h2>' + cOrder(curatedData.keywords[_ckw]).map(cVitem).join(''); }
-    html += '<h2>' + heading + '</h2>';
-    if(!items.length){
-      html += '<div class="nempty">動画が見つかりませんでした。</div>';
-    } else {
+    if(items.length){
+      html += '<h2>' + heading + '</h2>';
       for(const it of items){
         html += '<a class="vitem" href="https://www.youtube.com/watch?v=' + it.id
              + '" target="_blank" rel="noopener">'
@@ -962,6 +1058,8 @@ async function loadVideos(){
              + '<div><div class="vtitle">' + it.title + '</div>'
              + '<div class="vmeta">YouTube ・ ' + it.channel + ' ・ ' + fmtDate(it.date) + '</div></div></a>';
       }
+    } else if(!_ckw){
+      html += '<h2>' + heading + '</h2><div class="nempty">動画が見つかりませんでした。</div>';
     }
     box.innerHTML = html;
   }catch(e){
@@ -973,7 +1071,7 @@ document.querySelectorAll('#tabs .tab').forEach(t => {
     document.querySelectorAll('#tabs .tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     const label = t.textContent.trim();
-    document.body.classList.remove('news-mode', 'weather-mode', 'video-mode');
+    document.body.classList.remove('news-mode', 'weather-mode', 'video-mode', 'paper-mode');
     if(label === 'すべて'){
       const term = q.value.trim();
       if(term) doSearch(term);
@@ -987,6 +1085,9 @@ document.querySelectorAll('#tabs .tab').forEach(t => {
     } else if(label === '気象情報'){
       document.body.classList.add('weather-mode');
       loadWeather();
+    } else if(label === '論文'){
+      document.body.classList.add('paper-mode');
+      loadPapers();
     }
   });
 });
