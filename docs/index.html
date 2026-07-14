@@ -101,6 +101,9 @@
   .kcard .kdesc { color: #333; font-size: 0.92rem; line-height: 1.6; margin: 0 0 8px; }
   .kcard .ksource { color: #999; font-size: 0.72rem; margin: 0; }
   .result { padding: 20px 0; }
+  /* 先頭の結果だけ上余白を詰める(タブ直下に) */
+  #ddgweb:empty + .result { padding-top: 0; }
+  #ddgweb > .result:first-child { padding-top: 0; }
   .site { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
   .site img { width: 26px; height: 26px; border: 1px solid #eee; border-radius: 50%;
           background: #fff; padding: 3px; }
