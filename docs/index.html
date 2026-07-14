@@ -612,80 +612,57 @@ async function doSearch(term) {
   render();
 }
 
-async function renderDdgWeb(term) {
+async function renderWiki(term) {
   const box = document.getElementById('ddgweb');
   if (!box) return;
-  const ddgUrl = 'https://duckduckgo.com/?q=' + encodeURIComponent(term);
-  const fallback = `<div class="ddgcard">
-    <img src="https://www.google.com/s2/favicons?domain=duckduckgo.com&sz=64" alt="">
-    <div><div class="ddgtitle">ウェブ全体からの検索</div>
-    <a class="ddgbtn" href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoで「${term}」を検索</a></div>
-  </div>`;
-  const target = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(term) + '&kl=jp-jp';
-  const proxies = [
-    u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
-    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
-    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-  ];
-  for (const wrap of proxies) {
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 6000);
-      const res = await fetch(wrap(target), { signal: ctrl.signal });
-      clearTimeout(timer);
-      if (!res.ok) continue;
-      const text = await res.text();
-      const doc = new DOMParser().parseFromString(text, 'text/html');
-      const items = [];
-      doc.querySelectorAll('.result').forEach(el => {
-        const a = el.querySelector('a.result__a');
-        if (!a) return;
-        let href = a.getAttribute('href') || '';
-        const m = href.match(/uddg=([^&]+)/);
-        if (m) { try { href = decodeURIComponent(m[1]); } catch(e) {} }
-        if (!/^https?:/.test(href)) return;
-        const sn = el.querySelector('.result__snippet');
-        items.push({ t: a.textContent.trim(), u: href, s: sn ? sn.textContent.trim() : '' });
-      });
-      if (!items.length) continue;
-      let out = '<h2>ウェブ検索結果 <span>・ DuckDuckGo より</span></h2>';
-      for (const it of items.slice(0, 8)) {
-        let dom = ''; try { dom = new URL(it.u).hostname; } catch(e) {}
-        out += `<div class="result">
-          <div class="site">
-            <img src="https://www.google.com/s2/favicons?domain=${dom}&sz=64" alt="">
-            <div><div class="sitename">${dom}</div></div>
-          </div>
-          <a class="rtitle" href="${it.u}" target="_blank" rel="noopener">${it.t}</a>
-          <p class="excerpt">${it.s}</p>
-        </div>`;
-      }
-      out += `<p style="margin:12px 0;"><a href="${ddgUrl}" target="_blank" rel="noopener">DuckDuckGoでもっと見る</a></p>`;
-      box.innerHTML = out;
-      return;
-    } catch(e) { /* 次の中継へ */ }
-  }
-  box.innerHTML = fallback;
+  const esc = x => (x || '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const api = 'https://ja.wikipedia.org/w/api.php?action=query&format=json&origin=*'
+    + '&prop=extracts&exintro=1&explaintext=1&exchars=260'
+    + '&generator=search&gsrlimit=1&gsrsearch=' + encodeURIComponent(term);
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(api, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return;
+    const j = await res.json();
+    const pages = j && j.query && j.query.pages;
+    if (!pages) return;
+    const p = Object.values(pages)[0];
+    if (!p || !p.extract) return;
+    const title = p.title || term;
+    // 検索語とタイトルが無関係なら出さない(精度対策)
+    const norm = x => (x || '').replace(/\s|\u3000/g, '').toLowerCase();
+    const nt = norm(title), nq = norm(term);
+    if (nt && nq && !nt.includes(nq) && !nq.includes(nt)) return;
+    const wikiUrl = 'https://ja.wikipedia.org/wiki/' + encodeURIComponent(title.replace(/ /g, '_'));
+    let extract = p.extract.trim();
+    if (extract.length > 240) extract = extract.slice(0, 240) + '…';
+    const crumb = 'https://ja.wikipedia.org › wiki › ' + esc(title);
+    box.innerHTML = '<div class="result">'
+      + '<div class="site">'
+      + '<img src="https://www.google.com/s2/favicons?domain=ja.wikipedia.org&sz=64" alt="">'
+      + '<div><div class="sitename">ウィキペディア</div><div class="siteurl">' + crumb + '</div></div>'
+      + '</div>'
+      + '<a class="rtitle" href="' + wikiUrl + '" target="_blank" rel="noopener">' + esc(title) + ' - Wikipedia</a>'
+      + '<p class="excerpt">' + esc(extract) + '</p>'
+      + '</div>';
+  } catch (e) { /* Wikipedia失敗は無視 */ }
 }
 
 async function render() {
   const total = results.length;
-  countEl.textContent = total
-    ? `「${lastTerm}」の${total}件の検索結果`
-    : `「${lastTerm}」に一致する結果はありませんでした`;
+  countEl.textContent = total ? `「${lastTerm}」の${total}件の検索結果` : '';
+  countEl.style.display = total ? '' : 'none';
 
   let start, end;
   if (isMobile()) { start = 0; end = Math.min(total, loaded); }
   else { start = (page - 1) * PER_PAGE; end = Math.min(total, start + PER_PAGE); }
 
   const datas = await Promise.all(results.slice(start, end).map(r => r.data()));
-  // DuckDuckGoウェブ結果(0件時、または1〜2文字の短い検索語のとき)
-  let ddgTop = '';
-  const ddgShort = lastTerm.replace(/\s|\u3000/g, '').length <= 2;
-  if (total === 0 || ddgShort) {
-    ddgTop = '<div id="ddgweb"><div class="ddgcard">DuckDuckGoのウェブ結果を読み込み中…</div></div>';
-    setTimeout(() => renderDdgWeb(lastTerm), 0);
-  }
+  // Wikipedia(常に上部に1件表示。該当記事がなければ何も出ない)
+  let ddgTop = '<div id="ddgweb"></div>';
+  setTimeout(() => renderWiki(lastTerm), 0);
   resultsEl.innerHTML = ddgTop + topLinkHtml + datas.map(d => {
     const url = (d.meta && d.meta.url) || d.url;
     const title = (d.meta && d.meta.title) || url;
