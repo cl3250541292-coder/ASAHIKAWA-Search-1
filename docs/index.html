@@ -694,6 +694,9 @@ async function render() {
     </div>`;
   }).join('');
 
+  resultsEl.insertAdjacentHTML('beforeend', '<div id="allvideos"></div>');
+  renderAllTabVideos(lastTerm);
+
   pagerEl.innerHTML = '';
   if (isMobile()) {
     if (end < total) {
@@ -889,6 +892,40 @@ async function loadWeather(){
   }
 }
 let videoData = null;
+let curatedData = null;
+async function loadCurated(){
+  if(curatedData) return curatedData;
+  try{ const r = await fetch('curated.json?_=' + Date.now()); curatedData = await r.json(); }
+  catch(e){ curatedData = { keywords: {} }; }
+  if(!curatedData.keywords) curatedData.keywords = {};
+  return curatedData;
+}
+function cShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function cMatchKey(term){
+  if(!term || !curatedData) return null;
+  let best=null;
+  for(const kw in curatedData.keywords){ if(term.includes(kw) && (!best || kw.length>best.length)) best=kw; }
+  return best;
+}
+function cOrder(list){ const p=list.filter(v=>v.pin); const r=cShuffle(list.filter(v=>!v.pin)); return p.concat(r); }
+function cPool(){ const seen={}, out=[]; for(const k in curatedData.keywords) for(const v of curatedData.keywords[k]){ if(!seen[v.id]){ seen[v.id]=1; out.push(v); } } return out; }
+function cVitem(it){
+  return '<a class="vitem" href="https://www.youtube.com/watch?v=' + it.id + '" target="_blank" rel="noopener">'
+    + '<img class="vthumb" src="https://i.ytimg.com/vi/' + it.id + '/mqdefault.jpg" alt="" loading="lazy">'
+    + '<div><div class="vtitle">' + (it.title || '') + '</div>'
+    + '<div class="vmeta">YouTube' + (it.channel ? ' \u30fb ' + it.channel : '') + '</div></div></a>';
+}
+async function renderAllTabVideos(term){
+  await loadCurated();
+  const kw = cMatchKey(term);
+  let list = kw ? cOrder(curatedData.keywords[kw]) : cShuffle(cPool()).slice(0,6);
+  const box = document.getElementById('allvideos');
+  if(!box) return;
+  if(!list || !list.length){ box.innerHTML=''; return; }
+  let h = '<h2 style="font-size:1.1rem;margin:28px 0 12px;color:#202124;">\u95a2\u9023\u3059\u308b\u52d5\u753b</h2>';
+  for(const it of list.slice(0,8)) h += cVitem(it);
+  box.innerHTML = h;
+}
 async function loadVideos(){
   const box = document.getElementById('videos');
   box.innerHTML = '<div class="nempty">読み込み中…</div>';
@@ -898,6 +935,7 @@ async function loadVideos(){
       videoData = await res.json();
     }
     const term = q.value.trim();
+    await loadCurated();
     let items, heading;
     if(term.includes('ニュース')){
       items = (videoData.items || []).filter(it => it.city === 'news');
@@ -910,7 +948,10 @@ async function loadVideos(){
       }
       heading = CITY[cityMode].name + 'の動画';
     }
-    let html = '<h2>' + heading + '</h2>';
+    let html = '';
+    const _ckw = cMatchKey(term);
+    if(_ckw){ html += '<h2>おすすめ動画</h2>' + cOrder(curatedData.keywords[_ckw]).map(cVitem).join(''); }
+    html += '<h2>' + heading + '</h2>';
     if(!items.length){
       html += '<div class="nempty">動画が見つかりませんでした。</div>';
     } else {

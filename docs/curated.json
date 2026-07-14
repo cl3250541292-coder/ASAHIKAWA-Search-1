@@ -1,0 +1,501 @@
+{
+ "updated": "2026-07-14T12:57:01.058962+00:00",
+ "keywords": {
+  "ゴールデンカムイ": [
+   {
+    "id": "H4cw3kEE0ZQ",
+    "title": "3分で振り返り！TVアニメ「ゴールデンカムイ」第一期スペシャル映像ッ!!",
+    "channel": "NBCUniversal Anime/Music",
+    "pin": true
+   },
+   {
+    "id": "8b3MdkhyHHw",
+    "title": "Golden Kamuy Locations in Real-Life",
+    "channel": "Daily Otaku Life"
+   },
+   {
+    "id": "t31CLh9hUZY",
+    "title": "北鎮記念館バーチャルツアー０１（ダイジェスト版）",
+    "channel": "陸上自衛隊第2師団"
+   },
+   {
+    "id": "vt7o58bX-6M",
+    "title": "【イチバン!!】えっ！ゴールデンカムイのお菓子も！？札幌でイチバン古い和菓子メーカーの挑戦",
+    "channel": "HTB北海道ニュース"
+   },
+   {
+    "id": "SF8jW6paGZ0",
+    "title": "【3月13日(金)公開】『ゴールデンカムイ 網走監獄襲撃編』網走監獄PV",
+    "channel": "東宝MOVIEチャンネル"
+   },
+   {
+    "id": "ffEdXd545tw",
+    "title": "『ゴールデンカムイ 網走監獄襲撃編』予告【2026年3月13日(金)公開】",
+    "channel": "東宝MOVIEチャンネル"
+   },
+   {
+    "id": "2loIAVv7GYQ",
+    "title": "映画『ゴールデンカムイ』予告①【2024年1月19日(金)公開ッ‼】",
+    "channel": "東宝MOVIEチャンネル"
+   },
+   {
+    "id": "eMfHq5nTGsw",
+    "title": "【大ヒット上映中ッ!!!】『ゴールデンカムイ 網走監獄襲撃編』TVCM＜杉元の願い篇＞",
+    "channel": "東宝MOVIEチャンネル"
+   }
+  ],
+  "カムイの歌": [
+   {
+    "id": "wlUiDIEz0r8",
+    "title": "【伝承者】１９歳で亡くなった知里幸恵さんモデルの映画「カムイのうた」製作発表　北海道・東川が舞台",
+    "channel": "STVニュース北海道",
+    "pin": true
+   },
+   {
+    "id": "6Cuekd1bzdI",
+    "title": "【カムイと共に】口伝えのアイヌ語を後世に伝えるために…文字に書き留めた女性の思い",
+    "channel": "STVニュース北海道"
+   },
+   {
+    "id": "br0JPp6mqSU",
+    "title": "【予告編】映画『カムイのうた』《2023年11月23日北海道劇場公開》（\"Songs of Kamui (Kamui no Uta)\" Trailer (#2)2023.09ver）",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "U6D11Sk-gXg",
+    "title": "【第1弾予告】映画『カムイのうた』《2023年11月23日北海道劇場公開》",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "5MrfBjcBdwY",
+    "title": "映画『カムイのうた』メイキング映像／吉田美月喜編《2024年1月26日より全国劇場順次公開》",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "uEAn5Gdxziw",
+    "title": "2022.5.19 映画『カムイのうた』制作発表会 ／松岡市郎町長コメント",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "aORWqSzTy4U",
+    "title": "映画『カムイのうた』メイキング映像／藤村久和編《2024年1月26日より全国劇場順次公開》",
+    "channel": "写真の町 北海道上川郡東川町"
+   }
+  ],
+  "東川": [
+   {
+    "id": "wlUiDIEz0r8",
+    "title": "【伝承者】１９歳で亡くなった知里幸恵さんモデルの映画「カムイのうた」製作発表　北海道・東川が舞台",
+    "channel": "STVニュース北海道",
+    "pin": true
+   },
+   {
+    "id": "6Cuekd1bzdI",
+    "title": "【カムイと共に】口伝えのアイヌ語を後世に伝えるために…文字に書き留めた女性の思い",
+    "channel": "STVニュース北海道"
+   },
+   {
+    "id": "br0JPp6mqSU",
+    "title": "【予告編】映画『カムイのうた』《2023年11月23日北海道劇場公開》（\"Songs of Kamui (Kamui no Uta)\" Trailer (#2)2023.09ver）",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "U6D11Sk-gXg",
+    "title": "【第1弾予告】映画『カムイのうた』《2023年11月23日北海道劇場公開》",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "5MrfBjcBdwY",
+    "title": "映画『カムイのうた』メイキング映像／吉田美月喜編《2024年1月26日より全国劇場順次公開》",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "uEAn5Gdxziw",
+    "title": "2022.5.19 映画『カムイのうた』制作発表会 ／松岡市郎町長コメント",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "aORWqSzTy4U",
+    "title": "映画『カムイのうた』メイキング映像／藤村久和編《2024年1月26日より全国劇場順次公開》",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "zFhx9efzgHw",
+    "title": "留学生が挑戦する木工家具制作｜東川町PR動画",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "Mg7ynddJ654",
+    "title": "東川町職員採用試験紹介動画｜若手職員インタビュー（ショートver.）",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "bv6pLnoPH3s",
+    "title": "東川町職員採用試験紹介動画｜若手職員インタビュー（フルver.）",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "ZRcPNH8PIzw",
+    "title": "紀尾井町 福田家×北海道 東川町　ふるさと納税コラボ返礼品特別インタビュー",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "vh9iyvkyH5s",
+    "title": "2024 がんと運動全国キャラバン",
+    "channel": "写真の町 北海道上川郡東川町"
+   },
+   {
+    "id": "1f2O-C4lBaU",
+    "title": "ヌプリコロカムイノミ（本編・英語字幕版）～大雪山系 旭岳 アイヌ文化を伝える～",
+    "channel": "写真の町 北海道上川郡東川町"
+   }
+  ],
+  "ムックリ": [
+   {
+    "id": "YsLHLRar7Pw",
+    "title": "川村カ子ト アイヌ記念館",
+    "channel": "公益財団法人アイヌ民族文化財団"
+   },
+   {
+    "id": "UN_D24T3fJ4",
+    "title": "あさっぴーの観光散歩「川村カ子トアイヌ記念館」編（2016年9月24日放送）",
+    "channel": "旭川市公式チャンネル"
+   },
+   {
+    "id": "wGdW6AqKVw0",
+    "title": "日本最古「川村カ子トアイヌ記念館」の新館がオープン",
+    "channel": "北海道新聞　どうしん動画ニュース"
+   }
+  ],
+  "サイパル": [
+   {
+    "id": "es-wu56CUjI",
+    "title": "科学館に行ってみました",
+    "channel": "旭川市公式チャンネル"
+   },
+   {
+    "id": "bH2lq1798xs",
+    "title": "旭川市科学館サイパル「常設展示室紹介２」",
+    "channel": "サイパル"
+   },
+   {
+    "id": "oSrN1OnTsqM",
+    "title": "【旭川市科学館サイパル】もはや遊園地！？遊びながら科学が学べる！",
+    "channel": "ソラノワ"
+   },
+   {
+    "id": "qUs-8U4Mz0Q",
+    "title": "【車中泊de旅しよう♪】旭川科学館サイパルで科学を学ぶ！の巻",
+    "channel": "旅する はんこちゃんねる"
+   },
+   {
+    "id": "umAwBQMmPS4",
+    "title": "マイタウンあさひかわ「子どもも大人も！わくわく科学館」2025年8月24日放送",
+    "channel": "HBC 公式YouTube"
+   }
+  ],
+  "旭山動物園": [
+   {
+    "id": "7pXujl3I1hs",
+    "title": "[4K]「伝えるのは、命」- 旭川市旭山動物園公式プロモーションビデオ /Asahiyama Zoo Promotional Video",
+    "channel": "旭川市旭山動物園（Asahiyamazoo）"
+   },
+   {
+    "id": "-MbLIUu0c5w",
+    "title": "「すごいやんちゃそう」１歳のマヌルネコ「ヒデ」が仲間入り！旭山動物園で初めてお披露目",
+    "channel": "HTB北海道ニュース"
+   },
+   {
+    "id": "t4kzvVCDgTY",
+    "title": "旭山動物園で冬の恒例行事「ペンギンの散歩」　来園者から歓声",
+    "channel": "北海道新聞　どうしん動画ニュース"
+   }
+  ],
+  "旭川駅": [
+   {
+    "id": "TvRzKnH341U",
+    "title": "【何と読む？】なぜ？旭川駅が「あさひがわ」。国鉄時代に刻まれた８３年間の駅名ミステリーを徹底調査！・・・２０２６年６月４日（木）放送（今日ドキッ！もんすけ調査隊）",
+    "channel": "HBCニュース　北海道放送"
+   }
+  ],
+  "旭川市": [
+   {
+    "id": "ZSuGEyh1h-U",
+    "title": "北海道【旭川】絶対に外せない観光スポットを20ヶ所一気に紹介します！2024最新版",
+    "channel": "ゆめたび全国版【観るガイドブック】"
+   }
+  ],
+  "男山": [
+   {
+    "id": "cVi044dICXM",
+    "title": "北海道・旭川の老舗酒蔵「男山」に酒パーク　「一升瓶滑り台」や試飲もできる売店も「交流楽しめる場所に」",
+    "channel": "HTB北海道ニュース"
+   },
+   {
+    "id": "_-5dAIZdVoc",
+    "title": "旭川の酒造会社「男山」で仕込み本格化",
+    "channel": "北海道新聞　どうしん動画ニュース"
+   },
+   {
+    "id": "ITxsIChOBa4",
+    "title": "北海道酒蔵巡回の旅｜男山株式会社vol.1（旭川市の風景と男山）",
+    "channel": "HOKKAIDOOR"
+   },
+   {
+    "id": "iETX2ApDGkU",
+    "title": "進む日本酒離れ　老舗酒蔵５代目の挑戦　明治創業「男山」コロナ禍で需要減　新たなファン開拓へ　旭川市",
+    "channel": "STVニュース北海道"
+   },
+   {
+    "id": "IfJ-000yZ48",
+    "title": "【初飲酒！？】旭川は酒も旨い！！男山さんで酒を飲むために色々考えてみた結果・・・　男山酒パーク　いただきガス　第６６話",
+    "channel": "旭川ガスちゃんねる"
+   }
+  ],
+  "あさひかわラーメン": [
+   {
+    "id": "eBvfP3OAgSI",
+    "title": "【完全保存版】旭川ラーメン完全ガイド！老舗からクセ強まで全部食べてみた",
+    "channel": "Hokkaido, Japan (北海道旅行)"
+   },
+   {
+    "id": "PXiqBgH0Xbs",
+    "title": "なぜ札幌ラーメンは味噌？函館は塩？旭川は醤油？北海道ラーメンの謎に迫る【HBCもんすけ調査隊】（2022年4月21日放送）今日ドキッ！",
+    "channel": "HBCニュース　北海道放送"
+   }
+  ],
+  "上野ファーム": [
+   {
+    "id": "3LmU2mnb6D8",
+    "title": "ハナタビ北海道〜ルピナス＆上野ファーム【どさんこワイド179】2021.07.09放送",
+    "channel": "どさんこワイド１７９"
+   },
+   {
+    "id": "Cy7Dxl8bGF0",
+    "title": "《憧れの上野ファーム》宿根草が咲き誇る自然風庭園❀お知らせ《北海道お庭巡り・前編》",
+    "channel": "T's Garden Story"
+   }
+  ],
+  "旭川空港": [
+   {
+    "id": "I99FmwaRVQ4",
+    "title": "旭川空港　開港60周年記念式典",
+    "channel": "北海道新聞　どうしん動画ニュース"
+   },
+   {
+    "id": "cwDIHPuiSo4",
+    "title": "マイタウンあさひかわ「限定品盛りだくさん！魅力たっぷり旭川空港」2025年5月25日放送",
+    "channel": "HBC 公式YouTube"
+   },
+   {
+    "id": "Uos-dWhoMyI",
+    "title": "【北海道旅vlog #20】旭川空港②｜コンパクト空港を周る｜おすすめソフトクリーム",
+    "channel": "四季を楽しむ旅【北海道移住】"
+   }
+  ],
+  "き花": [
+   {
+    "id": "j-YJQvU1SJU",
+    "title": "過去→現在そして未来　９３年の老舗「街のシンボル」再進出の理由",
+    "channel": "STVニュース北海道"
+   },
+   {
+    "id": "ezXuJoSHFqY",
+    "title": "き花 工程紹介",
+    "channel": "壺屋き花の杜"
+   },
+   {
+    "id": "ehxwtiKGjdk",
+    "title": "き花 | 優秀品質最高金賞 モンドセレクション 2021",
+    "channel": "Monde Selection"
+   },
+   {
+    "id": "1uyKPN171OI",
+    "title": "空飛ぶクッキー『3D き花』",
+    "channel": "tsuboyasohonten"
+   },
+   {
+    "id": "7QRKCRzPocA",
+    "title": "Campos Brothers Farms",
+    "channel": "tsuboyasohonten"
+   },
+   {
+    "id": "fKogoKTDflU",
+    "title": "壺屋総本店CMソング　楽譜付き動画",
+    "channel": "tsuboyasohonten"
+   },
+   {
+    "id": "YEVMFtEqibU",
+    "title": "き花 Story",
+    "channel": "tsuboyasohonten"
+   }
+  ],
+  "カステラ": [
+   {
+    "id": "CABJK4bo-jg",
+    "title": "そっくりな２種類の「カステーラ」　北海道民に愛されるカステラのルーツを探る",
+    "channel": "STVニュース北海道"
+   }
+  ],
+  "旭川家具": [
+   {
+    "id": "ragdOHw1zp0",
+    "title": "旭川家具のカンディハウス　北海道産の木材をふんだんに使った「洋酒樽」製造に商機　2025年11月12日に放送",
+    "channel": "TVh北海道ニュース"
+   },
+   {
+    "id": "riJtrxsYmtY",
+    "title": "旭川家具の若手職人、第63回技能五輪全国大会で金賞含む全員入賞！",
+    "channel": "旭川デザインセンター / ASAHIKAWA DESIGN CENTER"
+   },
+   {
+    "id": "sonyWXfUnyA",
+    "title": "Sitting Styles — 6つのスタイルでめぐる椅子の世界",
+    "channel": "旭川デザインセンター / ASAHIKAWA DESIGN CENTER"
+   },
+   {
+    "id": "II9VjLXRqro",
+    "title": "旭川デザインセンター､3年に一度のショップリニューアルオープン",
+    "channel": "旭川デザインセンター / ASAHIKAWA DESIGN CENTER"
+   },
+   {
+    "id": "1shi7SbmUsM",
+    "title": "Up-Loop Actions — 高める｡繋げる｡旭川家具の持続可能なものづくり",
+    "channel": "旭川デザインセンター / ASAHIKAWA DESIGN CENTER"
+   },
+   {
+    "id": "5sIkCCJqGkE",
+    "title": "旭川木工技能競技大会2024プロモーションムービー",
+    "channel": "旭川デザインセンター / ASAHIKAWA DESIGN CENTER"
+   },
+   {
+    "id": "rYSKnS6O5dY",
+    "title": "バウ工房の遊び心 ー 技で紡ぐ木のしごと",
+    "channel": "旭川デザインセンター / ASAHIKAWA DESIGN CENTER"
+   }
+  ],
+  "深川農道音楽祭": [
+   {
+    "id": "MUNZCQB8nlI",
+    "title": "【北海道深川市】農道音楽祭で歌って食べて、フェスを満喫しました！",
+    "channel": "裏迫ですッ!【宮迫博之】"
+   },
+   {
+    "id": "OAvkXcSbLsk",
+    "title": "「農道音楽祭」　深川で初の野外フェス",
+    "channel": "北海道新聞　どうしん動画ニュース"
+   },
+   {
+    "id": "aCX2VioVOKY",
+    "title": "農道音楽祭 nouon 2025（第12回JACEイベントアワード部門賞受賞作品）",
+    "channel": "JACEイベントアワード"
+   },
+   {
+    "id": "ck2WtoWnqug",
+    "title": "【LIVE】SUPER☆GiRLS (スパガ) / Summer☆Wave!!! from 農道音楽祭-nouon-",
+    "channel": "SUPER☆GiRLS"
+   },
+   {
+    "id": "JgnhIvqag4k",
+    "title": "nouon2025ダイジェスト",
+    "channel": "農道音楽祭"
+   }
+  ],
+  "まちなかキャンパス": [
+   {
+    "id": "ijTDZNH55DA",
+    "title": "【公式】ナナカマド基金・まちなかキャンパス2022ダイジェスト",
+    "channel": "Asahikawa Machinaka Campus"
+   },
+   {
+    "id": "NX-_AtTuj9A",
+    "title": "【公式】ナナカマド基金・まちなかキャンパス 2022フル",
+    "channel": "Asahikawa Machinaka Campus"
+   },
+   {
+    "id": "CgHdd6LzInk",
+    "title": "【公式】ナナカマド基金・まちなかキャンパス2023ダイジェスト 協賛あり",
+    "channel": "Asahikawa Machinaka Campus"
+   },
+   {
+    "id": "gz_az7jJzeo",
+    "title": "【旭川東高有志撮影】まちなかキャンパス2022（大学生・企業）",
+    "channel": "Asahikawa Machinaka Campus"
+   },
+   {
+    "id": "WPgX_4Q4mHI",
+    "title": "【旭川東高有志撮影】まちなかキャンパス2022(高校生）",
+    "channel": "Asahikawa Machinaka Campus"
+   },
+   {
+    "id": "jTFDI1zwp3U",
+    "title": "【旭川東高有志撮影】まちなかキャンパス2022（参加者）",
+    "channel": "Asahikawa Machinaka Campus"
+   }
+  ],
+  "DESIGN": [
+   {
+    "id": "FEnqaxXVbgg",
+    "title": "Design System Video",
+    "channel": "デザイン都市あさひかわ"
+   },
+   {
+    "id": "kSQxy3vmPD4",
+    "title": "City of Design ASAHIKAWA Promotional video  | full long version",
+    "channel": "デザイン都市あさひかわ"
+   },
+   {
+    "id": "ZNHnUSgoSFo",
+    "title": "サブネットワーク会議デザイン分野招致活動動画",
+    "channel": "デザイン都市あさひかわ"
+   },
+   {
+    "id": "3MRG-VYV-L4",
+    "title": "キッズデザイン事業2022（中学生以上向け／動画）",
+    "channel": "デザイン都市あさひかわ"
+   },
+   {
+    "id": "THtxhsb-Zp8",
+    "title": "ユネスコ・デザイン都市旭川プロモーションムービー・完全ロング版",
+    "channel": "デザイン都市あさひかわ"
+   },
+   {
+    "id": "FLe5gIq-g_M",
+    "title": "デザイン手書き会議 WS用動画1回目",
+    "channel": "デザイン都市あさひかわ"
+   }
+  ],
+  "安全地帯": [
+   {
+    "id": "v607tQGbgqw",
+    "title": "「玉置浩二 Concert Tour 2024 Resume 〜レジューム 新たな始まり」ダイジェスト映像",
+    "channel": "【公式】玉置浩二 Koji Tamaki SALTMODERATE"
+   },
+   {
+    "id": "2MdqQmZePBo",
+    "title": "「玉置浩二 with 故郷楽団 10周年 Concert Tour 2025 ～blue eggplant field」ダイジェスト映像",
+    "channel": "【公式】玉置浩二 Koji Tamaki SALTMODERATE"
+   },
+   {
+    "id": "gSGlN_NgkB0",
+    "title": "玉置浩二「ファンファーレ」MV Short Ver(TBS系 日曜劇場『ザ・ロイヤルファミリー』主題歌)",
+    "channel": "【公式】玉置浩二 Koji Tamaki SALTMODERATE"
+   },
+   {
+    "id": "Xvx1GvsOMdI",
+    "title": "玉置浩二「ファンファーレ」MUSIC VIDEO(TBS系 日曜劇場『ザ・ロイヤルファミリー』主題歌)",
+    "channel": "【公式】玉置浩二 Koji Tamaki SALTMODERATE"
+   },
+   {
+    "id": "Dvhysbn4pDg",
+    "title": "玉置浩二「惑星」 #music #live #shorts",
+    "channel": "【公式】玉置浩二 Koji Tamaki SALTMODERATE"
+   },
+   {
+    "id": "9yBYUjlsxc0",
+    "title": "玉置浩二「しあわせのランプ」 #music #live #shorts",
+    "channel": "【公式】玉置浩二 Koji Tamaki SALTMODERATE"
+   }
+  ]
+ }
+}
