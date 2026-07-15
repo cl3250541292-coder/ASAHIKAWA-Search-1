@@ -971,6 +971,8 @@ function jCard(it){
   return h + '</div>';
 }
 
+// IRDBの表示切替(true にすると機関リポジトリのセクションが出る)
+const IRDB_ENABLED = false;
 async function fetchIrdb(term){
   const url = PROXY + '/irdb?format=atom&fulltext=1&lang=ja&count=20&start=1&q=' + encodeURIComponent(term);
   const ctrl = new AbortController();
@@ -1039,7 +1041,11 @@ async function loadPapers(){
     }catch(e){ return { items: [], total: 0, err: e.message || e.name }; }
   })();
 
-  const [jst, ird, cin] = await Promise.all([fetchJstage(term), fetchIrdb(term), cinii]);
+  const [jst, ird, cin] = await Promise.all([
+    fetchJstage(term),
+    IRDB_ENABLED ? fetchIrdb(term) : Promise.resolve({ items: [], total: 0 }),
+    cinii
+  ]);
 
   const pIds = (it, t) => { let a = it['dc:identifier'] || []; if(!Array.isArray(a)) a = [a];
     return a.filter(x => x && x['@type'] === t).map(x => x['@value']); };
@@ -1103,7 +1109,6 @@ async function loadPapers(){
   if(other.length) html += '<h3 class="psec">その他 ' + other.length + '件</h3>' + other.map(pCard).join('');
   html += '<p style="margin:16px 0;">'
     + '<a href="https://www.jstage.jst.go.jp/result/global/-char/ja?globalSearchKey=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">J-STAGEで見る</a>'
-    + ' ・ <a href="https://irdb.nii.ac.jp/search?q=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">IRDBで見る</a>'
     + ' ・ <a href="https://cir.nii.ac.jp/all?q=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">CiNii Researchで見る</a></p>';
   box.innerHTML = html;
 }
