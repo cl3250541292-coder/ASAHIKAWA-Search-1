@@ -130,6 +130,10 @@ git push
   #ddgweb h2 { font-size: 1.05rem; color: #202124; }
   #ddgweb h2 span { font-weight: normal; color: #5f6368; font-size: 0.8rem; }
 
+  #ppager { display: flex; justify-content: center; align-items: center;
+            gap: 14px; margin: 28px 0 8px; }
+  #ppager a { color: #1a0dab; text-decoration: underline; cursor: pointer; font-size: 1.05rem; }
+  #ppager .cur { font-weight: bold; color: #000; text-decoration: none; }
   #pager { display: flex; justify-content: center; align-items: center;
           gap: 14px; margin: 20px 0 28px; flex-wrap: wrap; }
   #pager a { color: #1a0dab; text-decoration: underline; cursor: pointer; font-size: 1.05rem; }
@@ -924,8 +928,8 @@ let videoData = null;
 function pEsc(x){ return (x||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 const PROXY = 'https://academic-proxy.cl-3250541292.workers.dev';
 
-async function fetchJstage(term){
-  const url = PROXY + '/jstage?service=3&count=15&start=1&text=' + encodeURIComponent(term);
+async function fetchJstage(term, start){
+  const url = PROXY + '/jstage?service=3&count=15&start=' + (start || 1) + '&text=' + encodeURIComponent(term);
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 10000);
   try{
@@ -971,10 +975,12 @@ function jCard(it){
   return h + '</div>';
 }
 
+let paperPage = 1, lastPaperTerm = null;
+const PAPER_PER = 15;
 // IRDBの表示切替(true にすると機関リポジトリのセクションが出る)
 const IRDB_ENABLED = false;
-async function fetchIrdb(term){
-  const url = PROXY + '/irdb?format=atom&fulltext=1&lang=ja&count=20&start=1&q=' + encodeURIComponent(term);
+async function fetchIrdb(term, start){
+  const url = PROXY + '/irdb?format=atom&fulltext=1&lang=ja&count=15&start=' + (start || 1) + '&q=' + encodeURIComponent(term);
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 10000);
   try{
@@ -1021,16 +1027,19 @@ function iCard(it){
   return h + '</div>';
 }
 
-async function loadPapers(){
+async function loadPapers(page){
   const box = document.getElementById('papers');
   if(!box) return;
   const term = q.value.trim();
   if(!term){ box.innerHTML = '<div class="nempty">検索したい言葉を入力してください。</div>'; return; }
+  if(term !== lastPaperTerm){ paperPage = 1; lastPaperTerm = term; }
+  if(page) paperPage = page;
+  const pStart = (paperPage - 1) * PAPER_PER + 1;
   box.innerHTML = '<div class="nempty">読み込み中…</div>';
 
   const cinii = (async () => {
     try{
-      const url = 'https://cir.nii.ac.jp/opensearch/all?format=json&count=50&q=' + encodeURIComponent(term);
+      const url = 'https://cir.nii.ac.jp/opensearch/all?format=json&count=' + PAPER_PER + '&start=' + pStart + '&q=' + encodeURIComponent(term);
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 10000);
       const res = await fetch(url, { signal: ctrl.signal });
@@ -1042,8 +1051,8 @@ async function loadPapers(){
   })();
 
   const [jst, ird, cin] = await Promise.all([
-    fetchJstage(term),
-    IRDB_ENABLED ? fetchIrdb(term) : Promise.resolve({ items: [], total: 0 }),
+    fetchJstage(term, pStart),
+    IRDB_ENABLED ? fetchIrdb(term, pStart) : Promise.resolve({ items: [], total: 0 }),
     cinii
   ]);
 
@@ -1107,10 +1116,32 @@ async function loadPapers(){
   if(web.length)   html += '<h3 class="psec">Webで読める（DOIあり） ' + web.length + '件</h3>' + web.map(pCard).join('');
   if(lib.length)   html += '<h3 class="psec">図書館に所蔵 ' + lib.length + '件</h3>' + lib.map(pCard).join('');
   if(other.length) html += '<h3 class="psec">その他 ' + other.length + '件</h3>' + other.map(pCard).join('');
+  html += '<div id="ppager"></div>';
   html += '<p style="margin:16px 0;">'
     + '<a href="https://www.jstage.jst.go.jp/result/global/-char/ja?globalSearchKey=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">J-STAGEで見る</a>'
     + ' ・ <a href="https://cir.nii.ac.jp/all?q=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">CiNii Researchで見る</a></p>';
   box.innerHTML = html;
+  renderPaperPager(Math.max(Number(jst.total) || 0, Number(cin.total) || 0));
+}
+
+function renderPaperPager(total){
+  const el = document.getElementById('ppager');
+  if(!el || !total) return;
+  const pages = Math.min(30, Math.ceil(total / PAPER_PER));
+  if(pages <= 1) return;
+  const add = (n, label, cur) => {
+    const a = document.createElement('a');
+    a.textContent = label || n;
+    if(cur) a.className = 'cur';
+    else a.onclick = () => { loadPapers(n); scrollTo(0, 0); };
+    el.appendChild(a);
+  };
+  let st = Math.max(1, paperPage - 3);
+  let en = Math.min(pages, st + 6);
+  if(st > 1){ add(1, '1'); el.append('…'); }
+  for(let i = st; i <= en; i++) add(i, String(i), i === paperPage);
+  if(en < pages){ el.append('…'); add(pages, String(pages)); }
+  if(paperPage < pages) add(paperPage + 1, '次へ >');
 }
 let curatedData = null;
 async function loadCurated(){
