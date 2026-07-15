@@ -971,6 +971,54 @@ function jCard(it){
   return h + '</div>';
 }
 
+async function fetchIrdb(term){
+  const url = PROXY + '/irdb?format=atom&fulltext=1&lang=ja&count=20&start=1&q=' + encodeURIComponent(term);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+  try{
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const doc = new DOMParser().parseFromString(await res.text(), 'text/xml');
+    const tg = (el, n) => { const x = el.getElementsByTagName(n)[0]; return x ? x.textContent.trim() : ''; };
+    const out = [];
+    for(const e of doc.getElementsByTagName('entry')){
+      const linkEl = e.getElementsByTagName('link')[0];
+      const link = tg(e, 'URI') || (linkEl ? linkEl.getAttribute('href') : '');
+      if(!link) continue;
+      out.push({
+        title: tg(e, 'title') || '(無題)',
+        link: link,
+        authors: Array.from(e.getElementsByTagName('name')).map(n => n.textContent.trim()),
+        jr: tg(e, 'prism:publicationName') || tg(e, 'publisher') || '',
+        ir: tg(e, 'irname'),
+        vol: tg(e, 'prism:volume'), num: tg(e, 'prism:number'),
+        sp: tg(e, 'prism:startingPage'), ep: tg(e, 'prism:endingPage'),
+        date: tg(e, 'prism:publicationDate'),
+      });
+    }
+    return { items: out, total: tg(doc, 'opensearch:totalResults') };
+  }catch(e){ clearTimeout(timer); return { items: [], total: 0, err: e.message || e.name }; }
+}
+
+function iCard(it){
+  let bib = [];
+  if(it.date) bib.push(String(it.date).slice(0,4) + '年');
+  if(it.vol) bib.push(it.vol + ' 巻');
+  if(it.num && it.num !== '0') bib.push(it.num + ' 号');
+  if(it.sp) bib.push(it.sp + (it.ep ? '-' + it.ep : ''));
+  let h = '<div class="result">'
+    + '<a class="rtitle" href="' + it.link + '" target="_blank" rel="noopener">' + pEsc(it.title) + '</a>';
+  if(it.authors.length) h += '<div class="pauth">' + pEsc(it.authors.slice(0,6).join(', ')) + (it.authors.length > 6 ? ' ほか' : '') + '</div>';
+  if(it.jr) h += '<div class="pjr">' + pEsc(it.jr) + '</div>';
+  if(bib.length) h += '<div class="pmeta">' + pEsc(bib.join(' ')) + '</div>';
+  if(it.date) h += '<div class="pmeta">発行日: ' + pEsc(it.date) + '</div>';
+  h += '<div class="ptags">'
+     + (it.ir ? '<span class="ptag ptag-b">' + pEsc(it.ir) + '</span>' : '')
+     + '<a class="ptag ptag-p" href="' + it.link + '" target="_blank" rel="noopener">本文を見る</a></div>';
+  return h + '</div>';
+}
+
 async function loadPapers(){
   const box = document.getElementById('papers');
   if(!box) return;
@@ -991,7 +1039,7 @@ async function loadPapers(){
     }catch(e){ return { items: [], total: 0, err: e.message || e.name }; }
   })();
 
-  const [jst, cin] = await Promise.all([fetchJstage(term), cinii]);
+  const [jst, ird, cin] = await Promise.all([fetchJstage(term), fetchIrdb(term), cinii]);
 
   const pIds = (it, t) => { let a = it['dc:identifier'] || []; if(!Array.isArray(a)) a = [a];
     return a.filter(x => x && x['@type'] === t).map(x => x['@value']); };
@@ -1040,18 +1088,22 @@ async function loadPapers(){
     else other.push(it);
   }
 
-  if(!jst.items.length && !cin.items.length){
+  if(!jst.items.length && !ird.items.length && !cin.items.length){
     box.innerHTML = '<div class="nempty">論文が見つかりませんでした。</div>'; return;
   }
   let html = '<h2>「' + pEsc(term) + '」の論文</h2>';
   if(jst.items.length) html += '<h3 class="psec">J-STAGEで本文が読める ' + jst.items.length + '件'
     + (jst.total ? '<span style="font-weight:400;color:#5f6368;font-size:0.85rem;"> ・ 全' + jst.total + '件</span>' : '')
     + '</h3>' + jst.items.map(jCard).join('');
+  if(ird.items.length) html += '<h3 class="psec">機関リポジトリで本文が読める ' + ird.items.length + '件'
+    + (ird.total ? '<span style="font-weight:400;color:#5f6368;font-size:0.85rem;"> ・ 全' + ird.total + '件</span>' : '')
+    + '</h3>' + ird.items.map(iCard).join('');
   if(web.length)   html += '<h3 class="psec">Webで読める（DOIあり） ' + web.length + '件</h3>' + web.map(pCard).join('');
   if(lib.length)   html += '<h3 class="psec">図書館に所蔵 ' + lib.length + '件</h3>' + lib.map(pCard).join('');
   if(other.length) html += '<h3 class="psec">その他 ' + other.length + '件</h3>' + other.map(pCard).join('');
   html += '<p style="margin:16px 0;">'
     + '<a href="https://www.jstage.jst.go.jp/result/global/-char/ja?globalSearchKey=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">J-STAGEで見る</a>'
+    + ' ・ <a href="https://irdb.nii.ac.jp/search?q=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">IRDBで見る</a>'
     + ' ・ <a href="https://cir.nii.ac.jp/all?q=' + encodeURIComponent(term) + '" target="_blank" rel="noopener">CiNii Researchで見る</a></p>';
   box.innerHTML = html;
 }
